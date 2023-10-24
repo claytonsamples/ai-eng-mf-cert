@@ -1,18 +1,21 @@
-# Get Started with AI
+# Prepare to develop AI solutions
 
 [Learning Path](https://learn.microsoft.com/en-us/training/modules/prepare-to-develop-ai-solutions-azure/)
 
-## Get Started with AI on Azure
-
+## Prepare to dev
 [Learn Module](https://learn.microsoft.com/training/modules/get-started-ai-fundamentals/?WT.mc_id=academic-0000-alfredodeza)
 
 ### Introduction to AI
 
-- **Machine Learning**: Foundation of AI. Teaches a machine to learn based on data
-- **Anomaly Detection**: Automatic error detection based on anomaly
-- **Computer Vision**: Interpretation of images and video
-- **Natural Language Processing (NLP)**: Interpret written or spoken language
-- **Knowledge mining**: Information extraction from unstructured data
+- **Define artificial intelligence**: Foundation of AI. Teaches a machine to learn based on data
+- **Understand AI-related terms**: Automatic error detection based on anomaly
+- **Understand considerations for AI Engineers**: Interpretation of images and video
+- **Understand considerations for responsible AI**:
+- **Understand capabilities of Azure Machine Learning**
+- **Understand capabilities of Azure AI Services**
+- **Understand capabilities of the Azure Bot Service**
+- **Understand capabilities of Azure Cognitive Search**
+
 
 ### Machine Learning
 
