@@ -1,6 +1,6 @@
 # Get Started with AI
 
-[Learning Path](https://learn.microsoft.com/training/paths/get-started-with-artificial-intelligence-on-azure/?WT.mc_id=academic-0000-alfredodeza)
+[Learning Path][(https://learn.microsoft.com/training/paths/get-started-with-artificial-intelligence-on-azure/?WT.mc_id=academic-0000-alfredodeza](https://learn.microsoft.com/en-us/training/modules/prepare-to-develop-ai-solutions-azure/))
 
 ## Get Started with AI on Azure
 
