@@ -74,3 +74,34 @@ create resources before configuring diagnostic logging for resource. create stor
 - create resources for logging: need a destination (event hubs), most likely to use Azure Log Analytics: query and visualize log data or Azure Storage: data log archives
 
 **configure diagnostic settings**
+
+## Deploy AI Services in Containers
+Learning Achievements:
+- understand containers
+- Provision AI service container
+
+**Understand containers**
+- service requires env that has hardware, operating system, runtime components
+- Container definition: hosts app or service and the runtime components to run it
+- Benefits: Containers are portable and easier to consolidate multiple apps that have different configurations
+- use: pull image from registry, deploy container on host, specify required config settings
+
+**Use AI service containers**
+- container images live in microsoft container registry
+- 3 required activities for deploy:
+- (1) services API is downloaded to local host (Docker Server, Azure container instance, azure kubernetes service);
+- (2) client apps submit data to endpoint of container service
+- (3) usage metrics sent for container service to calc billing
+
+**Azure container images**
+- each container provides subset of AI services
+- [List of Azure containers](https://learn.microsoft.com/en-us/azure/ai-services/cognitive-services-container-support)
+
+**Azure container config**
+3 required settings
+- APIKey: Key from AI service used for billing
+- Billing: Endpoint URI for deployed service used for billing
+- Eula: Value of accept to state acceptance of container license
+
+**Consume AI services from container**
+- apps consumer container endpoint not Services endpoint when used
