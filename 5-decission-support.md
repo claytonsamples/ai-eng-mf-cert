@@ -30,6 +30,7 @@ will need to submit a request to URI for each step and another request to get st
 
 **Authentication**
 | Key	| Value |
+---|---|
 | Ocp-Apim-Subscription-Key	| The key to your resource |
 
 **request deployment**
