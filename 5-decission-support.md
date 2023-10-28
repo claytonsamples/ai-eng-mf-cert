@@ -1,38 +1,52 @@
-# Explore Decision Support
+# Create a language understanding solution
 
-[Learning Path](https://learn.microsoft.com/training/paths/explore-fundamentals-of-decision-support/?WT.mc_id=academic-0000-alfredodeza)
+[Learning Path](https://learn.microsoft.com/en-us/training/paths/create-language-solution-azure-cognitive-services/)
 
-## Introduction to Anomaly Detector
+## Build a converstaional language understanding model
 
-[Learning Module](https://learn.microsoft.com/training/modules/intro-to-anomaly-detector/?WT.mc_id=academic-0000-alfredodeza)
+[Learning Module](https://learn.microsoft.com/en-us/training/modules/build-language-understanding-model/)
 
-Definition: An AI technique to detect if values in a series are within expectations.
+Learning Achievements:
+- provision
+- define intents, utterances, and entities
+- patterns to differentiate similar utterances
+- pre-build entity components
+- train,test, publish, and review 
 
-Example scenarios:
+**Understand resources for building a conversational language understanding model**
+provision language understanding service
 
-* Monitoring machine systems like HVAC
-* Cloud services usage over time
+**build model**
+- build, train, and deploy
 
-### Anomaly Detector service
+**Rest API**
+steps are asynch:
+- create project
+- import data
+- train
+- deploy
+- use model
+will need to submit a request to URI for each step and another request to get status of the job
 
-Definition: Part of the Decision Services category in Azure Cognitive Services. Exposes a REST API. The service can detect real-time data or historical data.
+**Authentication**
+| Key	| Value |
+| Ocp-Apim-Subscription-Key	| The key to your resource |
 
-Requires a *boundary* set with a sensitivity value. By default, _upper_ and _lower_ boundaries are calculated by including the expected value.
+**request deployment**
+pOST request to endpoing: e.g. {ENDPOINT}/language/authoring/analyze-conversations/projects/{PROJECT-NAME}/deployments/{DEPLOYMENT-NAME}?api-version={API-VERSION}
+|Placeholder|	Value	Example|
+|{ENDPOINT}|	The endpoint of your Azure AI Language resource|	https://<your-subdomain>.cognitiveservices.azure.com|
+|{PROJECT-NAME}|	The name for your project. This value is case-sensitive|	myProject|
+|{DEPLOYMENT-NAME}|	The name for your deployment. This value is case-sensitive	|staging|
+|{API-VERSION}|	The version of the API you're calling|	2022-05-01|
+will receive 202 if successful with response header of operation-location wiht a URL to request status
+{ENDPOINT}/language/authoring/analyze-conversations/projects/{PROJECT-NAME}/deployments/{DEPLOYMENT-NAME}/jobs/{JOB-ID}?api-version={API-VERSION}
 
-### Data Format
-
-The REST API uses JSON that uses _granularity_ (in time, e.g. "hourly"), the timestamp and the value for each timestamp. There is a max of values that can be sent to the API of 8640.
-
-Streaming is possible sending a single value at a time.
-
-Use interpolation to fill in gaps of measurements if there is more than 10% missing.o
-
-### Use cases
-
-**Batch detection**
-Best when the data is almost flat, with some spikes or dips, or a sesonal time series data with some anomalies.
-Example: Compliance on temperature control for medicine
-
-**Real-time detection**
-Best when requiring the latest measurement to be detected as normal or an anomaly. Every new data point is compared to past (seen) data points.
-Example: Current temperature while bottling carbonated drinks.
+**get deployment status**
+GET request to {ENDPOINT}/language/authoring/analyze-conversations/projects/{PROJECT-NAME}/deployments/{DEPLOYMENT-NAME}/jobs/{JOB-ID}?api-version={API-VERSION}
+|Placeholder	|Value|
+|{ENDPOINT}	|The endpoint for authenticating your API request|
+|{PROJECT-NAME}	|The name for your project (case-sensitive)|
+|{DEPLOYMENT-NAME}|	The name for your deployment (case-sensitive)|
+|{JOB-ID}	|The ID for locating your model's training status, found in the header value detailed above in the deployment request|
+|{API-VERSION}|	The version of the API you're calling|
