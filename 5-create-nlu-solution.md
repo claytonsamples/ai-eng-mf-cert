@@ -2,7 +2,7 @@
 
 [Learning Path](https://learn.microsoft.com/en-us/training/paths/create-language-solution-azure-cognitive-services/)
 
-### Build a converstaional language understanding model
+## Build a converstaional language understanding model
 
 [Learning Module](https://learn.microsoft.com/en-us/training/modules/build-language-understanding-model/)
 [Example](https://learn.microsoft.com/en-us/azure/ai-services/language-service/conversational-language-understanding/quickstart?pivots=rest-api#create-a-clu-project)
@@ -129,3 +129,57 @@ see link above in entitiy example section
 - Test the model interactively or using a testing dataset with known labels
 - Deploy a trained model to a public endpoint so client apps can use it
 - Review predictions and iterate on utterances to train your model
+
+## Publish and use an AI LU app
+learning achievements
+- Understand capabilities of an Azure AI Language Understanding app
+- Process predictions from an Azure AI Language Understanding app
+- Deploy an Azure AI Language understanding app in a container
+
+**Understand capabilities of the Azure AI Language service**
+feature types: pre-configured and learned
+- learned: require building and training a model to predict labels
+[Language Service](Understand capabilities of the Azure AI Language service)
+
+endpoint to query (reference)
+https://{ENDPOINT}/text/analytics/{VERSION}/{FEATURE}
+table:
+|Placeholder|	Value|
+--|--|
+|{ENDPOINT}|	The endpoint for authenticating your API request. For example, myLanguageService.cognitiveservices.azure.com|
+|{VERSION}|	The version number of the service you want to call. For example, v3.0|
+
+**preconfigured fts**
+- summarization: documents and conversations (key sentences that are predicted to encapsulate input's meaning)
+/{ENDPOINT}/text/analytics/{VERSION}/analyze
+|Placeholder|	Value|
+--|--|
+|{ENDPOINT}|	The endpoint for authenticating your API request. For example, myLanguageService.cognitiveservices.azure.com|
+|{VERSION}|	The version number of the service you want to call. For example, v3.0|
+{FEATURE}	The feature you're submitting the query to. For example, keyPhrases for key phrase detection
+
+**NER**
+extracts people, places, and/or companies
+**PII**
+identify, categorize, and redact information that could be considered sensitive
+**key phrase extraction**
+main concepts out of text
+**sentiment analysis**
+how positive or negative a string or document is
+**language detection**
+one or more documents and identifies the language for each
+**learned features**
+[lableing docs](https://learn.microsoft.com/en-us/azure/cognitive-services/language-service/conversational-language-understanding/how-to/tag-utterances)
+
+**Conversational language understanding**
+custom natural language to predict overall intent and extract impt info from incoming utterances
+requires data to be tagged by user to teach how to predict intents and entities accurately
+
+### Process Predictions
+requests parameters:
+- kind: indicate which language feature to request
+- parameters: parameters are unique to feature in kind
+- analysis input: input documents or text strings to be analyzed
+
+**prediction results**
+application needs to parse
