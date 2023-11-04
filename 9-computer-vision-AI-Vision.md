@@ -83,6 +83,49 @@ Test a trained model.
 Publish a trained model to a prediction resource.
 
 ## Detect objects in images
+object detection: identify location of specific classes of objects in image
+learning achievements:
+- describe object detection
+- train object detector
+- options for labeling images
 
+**understand object detection**
+components:
+1. class label of each object detected in image
+2. location of each object within the image, indicated as coordinates of bounding box
+
+azure custom vision for object detection
+You can use the Azure AI Custom Vision service to train an object detection model. To use the Azure AI Custom Vision service, you must provision two kinds of Azure resource:
+
+A training resource (used to train your models). This can be:
+An Azure AI Services resource.
+An Azure AI Custom Vision (Training) resource.
+A prediction resource, used by client applications to get predictions from your model. This can be:
+An Azure AI Services resource.
+An Azure AI Custom Vision (Prediction) resource.
+
+**train an object detector**
+different between image class and object detection model training is labeling of the images with tags
+object detection requires each label consists of tag and region defining the bounding box
+
+**Consider options for labeling images**
+- azure ai custom vision portal or,
+- [azure machine learning studio](https://learn.microsoft.com/en-us/azure/machine-learning/how-to-label-data),
+- [visual object tagging tool](https://github.com/microsoft/VoTT/blob/master/README.md)
+
+***bounding box measurement units**
+4 values define bounding boxes:
+- left (X) and top (Y) coordinates of the top-left corner of bounding box and width and height. values are expressed as proportional values relative to the source image size
+Left: 0.1
+Top: 0.5
+Width: 0.5
+Height: 0.25
+This defines a box in which the left is located 0.1 (one tenth) from the left edge of the image, and the top is 0.5 (half the image height) from the top. The box is half the width and a quarter of the height of the overall image.
 
 ## Detect, analyze, and recognize faces
+learning achievements:
+- identify options for face detection, analysis, and identification
+- understand considerations for face analysis
+- detect faces with azure ai vision
+- understand the capabilities of the face service
+- implement facial recognition
