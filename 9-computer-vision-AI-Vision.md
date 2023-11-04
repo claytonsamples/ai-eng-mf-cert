@@ -129,3 +129,38 @@ learning achievements:
 - detect faces with azure ai vision
 - understand the capabilities of the face service
 - implement facial recognition
+
+**Identify options for face detection analysis and identification**
+two services for face detection
+1. vision service: detect human faces in an image and bounding box
+2. face service: more comprehensive analysis capabilities: face detection w bb, facial feature analysis (head pose, spectables, blur, facial landmarks, oclusion, others), face comparison and verification, facial recognition
+
+**Understand considerations for face analysis**
+- data privacy and security: facial is personally identifiable. adequate protections for facial data used for model training and inferencing
+- transparency: ensure users are informed about facial data and who will have access to it
+- fairness and inclusiveness: ensure face-based system cannot be used in a mnaner that is preudicial to individuals based on their appearance, or to unfairly target individuals
+
+**Detect faces with vision service**
+call image REST function specifying faces [vision endpoint](https://learn.microsoft.com/en-us/rest/api/computer-vision/)
+
+**Understand capabilities of the face service**
+- face detection: results include an ID that identifies the face and bb coordinates
+- face attribute analysis: head pose(pitch, roll, and yaw orientation in 3D), glasses, blur(low,m,h), exposure(under,good,over),noise, occlusion(objects obscuring the face)
+- facial landmark location: coordiantes for key landmarks(eye corners, pupils, tip of nose,...)
+- face comparison: compare multiple images for similarity and verification
+- facial recognition: train a model belonging to specific individuals, and use the model to identify people in new images
+
+**Compare and match detected faces**
+retains ID (GUID) for 24 hours
+ID cached, subsequent images can be used to compare new faces to cached identity and determine if they are similar or to verify
+
+**Implement facial recognition**
+train:
+1. create a person group defining set of individuals to identify (ex. employees)
+2. add a person to the group for each individual to identify
+3. add detected faces from multiple images to each person, vary environment and poses. IDs faces will no longer expire after 24 hours (persisted faces)
+4. train model
+model is stored in face resource - client applications:
+- identify individuals
+- verify identity
+- analyze new images to find faces that are similar to persisted face
