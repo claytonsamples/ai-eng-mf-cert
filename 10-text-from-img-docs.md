@@ -1,10 +1,10 @@
-#Extract text from images and documents
+# Extract text from images and documents
 Learning achievements:
 how ai vision enables you to read text from images with read api
 use vision service with sdks and rest api
 develop app can read printed and handwritten text
 
-##Read text in images and docs with ai vision service
+## Read text in images and docs with ai vision service
 ***explore vision options for reading text***
 2 apis:
 1. read api: read small to large volumes of text from images and PDF; new model > accuracy than OCR API; can read printed text in multiple languages and handwritten text in eng; initial fnc call returns asynch operation ID, must be used in subsequent call to retrieve resutls
@@ -16,7 +16,7 @@ pass operation id in subsequent Get Read Results call
 results are broken down by page, line, word; text values are in both line and word levels+
 
 
-##extract data from forms with doc intelligence
+## extract data from forms with doc intelligence
 Learning achievements:
 - how azure document intelligence's layout service, prebuilt models, and customer service can automate processes
 - document inteligence's ocr capabilities with sdk, rest, and document intelligence studio
