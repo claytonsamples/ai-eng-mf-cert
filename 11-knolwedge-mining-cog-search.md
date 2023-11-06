@@ -258,8 +258,71 @@ example:
 }
 
 
-
 ## create knowledge store with cog search
+learning achievements:
+- create a knowledge store from cog search pipeline
+- view data in projections in a knowledge store
+
+search solution with pipeline of ai skills to enrich data and populate an index
+- language
+- key themes
+- sentiment
+- NER
+- descriptions of images or image text extraction
+
+**Define projections**
+each skill in skillset builds a JSON of enrich data for docs being indexed, can persist some or all fields in a projections
+
+***using shaper skill***
+organizes the iterative data from the skill to a more well formatted JSON; easier mapping
+
+**define a knowledge store**
+knowledgeStore object in the skillset
+can define object,table, file projections. must define a separate projection for each projection defined
+example of creating each projection:
+"knowledgeStore": { 
+      "storageConnectionString": "<storage_connection_string>", 
+      "projections": [
+        {
+            "objects": [
+                {
+                "storageContainer": "<container>",
+                "source": "/projection"
+                }
+            ],
+            "tables": [],
+            "files": []
+        },
+        {
+            "objects": [],
+            "tables": [
+                {
+                "tableName": "KeyPhrases",
+                "generatedKeyName": "keyphrase_id",
+                "source": "projection/key_phrases/*",
+                },
+                {
+                "tableName": "docs",
+                "generatedKeyName": "document_id", 
+                "source": "/projection" 
+                }
+            ],
+            "files": []
+        },
+        {
+            "objects": [],
+            "tables": [],
+            "files": [
+                {
+                "storageContainer": "<container>",
+                "source": "/document/normalized_images/*"
+                }
+            ]
+        }
+    ]
+ }
+
+
 ## enrich search index using language studio
 ## implement adv search ft in cog search
 ## bld ml custom skill for cog search
