@@ -325,7 +325,53 @@ example of creating each projection:
 - knoweldge store that contains a relational schema fo enriched data requires a Table projection to be defined.
 - knowledge store that contains JSON representation of the indexed documents requires an Object projection.
 - knowledge store that contains images extracted from indexed documents requires a File projection (create a .jpg file for each image extracted from a doc)
+
 ## enrich search index using language studio
+learning achievements:
+- language studio to enrich cog search indexes
+- enrich cog search index with custom class
+
+**Explore the available features of Azure AI Language**
+grouped features
+1. classify text
+2. understand QnA lang
+3. extract info
+4. summarize
+5. translate
+
+**Create, train, and deploy a conversation language understanding model**
+cutomizable features requires different steps to create model
+process steps after creating lanugage resource
+1. schema defintion. adding intents and entities app is interested in
+2. label data: example chats and utterances along with how they map to entities and intents
+3. train model: 80/20 split
+4. review performance
+5. deploy model
+6. test deployment
+
+**Enrich a cognitive search index with custom classes and Language Studio**
+considerations to enrich search index using custom text classification
+1. store docs so they can be accessed by language studio and cognitive search indexers
+2. create custom text classification project
+3. train and test
+4. create search index based on docs
+5. create function app that usees deployed model
+6. update search solution, index, indexer, custom skillset
+
+***store data***
+azure blob storage. make container accessible
+
+***Create your Language Studio project***
+create resource and set roles for language resource and storage account [docs for ref](https://learn.microsoft.com/en-us/azure/ai-services/language-service/custom-text-classification/how-to/create-project?tabs=azure-portal%2Cstudio%2Csingle-classification#set-roles-for-your-azure-language-resource-and-storage-account)
+
+***train classification model***
+
+
+
+
+
+
+
 ## implement adv search ft in cog search
 ## bld ml custom skill for cog search
 ## search data outside azure platform in cog search using data factory
