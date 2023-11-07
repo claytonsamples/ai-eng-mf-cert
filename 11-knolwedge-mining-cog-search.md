@@ -322,7 +322,9 @@ example of creating each projection:
     ]
  }
 
-
+- knoweldge store that contains a relational schema fo enriched data requires a Table projection to be defined.
+- knowledge store that contains JSON representation of the indexed documents requires an Object projection.
+- knowledge store that contains images extracted from indexed documents requires a File projection (create a .jpg file for each image extracted from a doc)
 ## enrich search index using language studio
 ## implement adv search ft in cog search
 ## bld ml custom skill for cog search
