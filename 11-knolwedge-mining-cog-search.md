@@ -365,11 +365,175 @@ azure blob storage. make container accessible
 create resource and set roles for language resource and storage account [docs for ref](https://learn.microsoft.com/en-us/azure/ai-services/language-service/custom-text-classification/how-to/create-project?tabs=azure-portal%2Cstudio%2Csingle-classification#set-roles-for-your-azure-language-resource-and-storage-account)
 
 ***train classification model***
+standard 80/20 split comments and test performance
+labeling key consideration here
 
+***create search index***
+follow [cog search solution](https://learn.microsoft.com/en-us/training/modules/create-azure-cognitive-search-solution/) and update index, indexer, and custom skill after creating function app
 
+***create azure function app***
+app pass json to custom text classification endpoint example below
+{
+    "displayName": "Extracting custom text classification", 
+    "analysisInput": {
+        "documents": [
+            {
+                "id": "1", 
+                "language": "en-us", 
+                "text": "This film takes place during the events of Get Smart. Bruce and Lloyd have been testing out an invisibility cloak, but during a party, Maraguayan agent Isabelle steals it for El Presidente. Now, Bruce and Lloyd must find the cloak on their own because the only non-compromised agents, Agent 99 and Agent 86  are in Russia"
+            }
+        ]
+      }, 
+    "tasks": [
+        {
+        "kind": "CustomMultiLabelClassification", 
+        "taskName": "Multi Label Classification", 
+        "parameters": {
+            "project-name": "movie-classifier", 
+            "deployment-name": "test-release"}
+        }
+    ]
+}
 
+then process JSON response from model, for example
+{
+  "jobId": "be1419f3-61f8-481d-8235-36b7a9335bb7",
+  "lastUpdatedDateTime": "2022-06-13T16:24:27Z",
+  "createdDateTime": "2022-06-13T16:24:26Z",
+  "expirationDateTime": "2022-06-14T16:24:26Z",
+  "status": "succeeded",
+  "errors": [],
+  "displayName": "Extracting custom text classification",
+  "tasks": {
+    "completed": 1,
+    "failed": 0,
+    "inProgress": 0,
+    "total": 1,
+    "items": [
+      {
+        "kind": "CustomMultiLabelClassificationLROResults",
+        "taskName": "Multi Label Classification",
+        "lastUpdateDateTime": "2022-06-13T16:24:27.7912131Z",
+        "status": "succeeded",
+        "results": {
+          "documents": [
+            {
+              "id": "1",
+              "class": [
+                {
+                  "category": "Action",
+                  "confidenceScore": 0.99
+                },
+                {
+                  "category": "Comedy",
+                  "confidenceScore": 0.96
+                }
+              ],
+              "warnings": []
+            }
+          ],
+          "errors": [],
+          "projectName": "movie-classifier",
+          "deploymentName": "test-release"
+        }
+      }
+    ]
+  }
+}
 
+function returns structured JSON message back to custom skillset in cog search, for example
+[{"category": "Action", "confidenceScore": 0.99}, {"category": "Comedy", "confidenceScore": 0.96}]
 
+function app needs to know 5 things:
+1. text to be classified
+2. endpoint for trained custom text classification deployed model (deploying model pane in studio)
+3. primary key for custom text class project (project settings)
+4. project name (project settings)
+5. deployment name (deploying model pane in studio)
+
+***update azure cog search solution***
+3 changes in azure portal to make to enrich search index
+1. add field to your index to store the custom text classification enrichment
+2. add custom skillset to call your function app with the text to classify
+3. map response from skillset into the index
+
+***add field to existing index***
+add JSOn below, which adds a compounded field to the index to store the class in a category field that is searchable. the second confidenceScore field stores the confidence percentage in a double field
+{
+  "name": "classifiedtext",
+  "type": "Collection(Edm.ComplexType)",
+  "analyzer": null,
+  "synonymMaps": [],
+  "fields": [
+    {
+      "name": "category",
+      "type": "Edm.String",
+      "facetable": true,
+      "filterable": true,
+      "key": false,
+      "retrievable": true,
+      "searchable": true,
+      "sortable": false,
+      "analyzer": "standard.lucene",
+      "indexAnalyzer": null,
+      "searchAnalyzer": null,
+      "synonymMaps": [],
+      "fields": []
+    },
+    {
+      "name": "confidenceScore",
+      "type": "Edm.Double",
+      "facetable": true,
+      "filterable": true,
+      "retrievable": true,
+      "sortable": false,
+      "analyzer": null,
+      "indexAnalyzer": null,
+      "searchAnalyzer": null,
+      "synonymMaps": [],
+      "fields": []
+    }
+  ]
+}
+
+***edit the custom skillset***
+just like above in azure portal, select skillset and add JSON in this format. WebApiSkill definition specifies the language and the contents of a doc are passed as inputs to the function app. app will return JSON text named class
+{
+  "@odata.type": "#Microsoft.Skills.Custom.WebApiSkill",
+  "name": "Genre Classification",
+  "description": "Identify the genre of your movie from its summary",
+  "context": "/document",
+  "uri": "https://learn-acs-lang-serives.cognitiveservices.azure.com/language/analyze-text/jobs?api-version=2022-05-01",
+  "httpMethod": "POST",
+  "timeout": "PT30S",
+  "batchSize": 1,
+  "degreeOfParallelism": 1,
+  "inputs": [
+    {
+      "name": "lang",
+      "source": "/document/language"
+    },
+    {
+      "name": "text",
+      "source": "/document/content"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "text",
+      "targetName": "class"
+    }
+  ],
+  "httpHeaders": {}
+}
+
+***map output from function ap into index***
+map output into the index. azure portal, select indexer and edit JSON to have a new output mapping. Below, indexer now knows the output from the function app document/class should be stored in the classifiedtext field. defined in compound field (see add field to existing index) function app has to return a JSON array containing a category and confiendenceScore field. You can now search enriched search index for custom classified text
+
+{
+  "sourceFieldName": "/document/class",
+  "targetFieldName": "classifiedtext"
+}
 
 
 ## implement adv search ft in cog search
