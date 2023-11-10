@@ -535,8 +535,79 @@ map output into the index. azure portal, select indexer and edit JSON to have a 
   "targetFieldName": "classifiedtext"
 }
 
+#knowledge check reminders:
+where do you copy the full endpoint (you read this as where do you find it. slow down): azure extension inside vs code
+which step enables cog search index to store enrichments: update to cog search solution
 
-## implement adv search ft in cog search
+
+## Implement adv search ft in cog search
+learning achievements:
+- improve the ranking of a document with term boosting
+- improve the relevance of results by adding scoring profiles
+- improve an index with analyzers and tokenized terms
+- enhance an index to include multiple languages
+- improve search experience by ordering results by distance from a given ref point
+
+**Improve the ranking of a document with term boosting**
+write more complex lucene queries; then improve relevance by boosting specific terms in search query
+
+***search an index***
+query processing reminder: query parsing, lexical analysis, doc retrieval, scoring
+
+***write a simple query***
+search=luxury&$select=Hotelid, HotelName, Category, Tags, Description&$count=true
+query parses will search for term luxury across all fields for a document in the index; select limits returned fields; last param asks index to count total results
+
+***enable lucene query parser***
+add to query &queryType=full to the query string
+Lucene syntax more precise queries with features available such as:
+- Boolean operators: and, or, not
+- fielded search: fieldName: search term
+- fuzzy search: ~ e.g. Description:luxury~
+- term proximity search: "term1 term2"~n; returns docs with words within three words of each other
+- reg ex search: /regular expression/
+- wildcard search: *  is many characters, ? is single character
+- precedence grouping: (term AND (term OR term)) e.g (Description:luxury OR category:luxury) and Tags:air?con*
+- term boosting: ^ e.g. description:luxury OR category:luxury^3; would give hotels with category luxury a higher score than luxury in description
+[lucene query syntax docs](https://learn.microsoft.com/en-us/azure/search/query-lucene-syntax)
+
+***boost search terms***
+query + boosting:
+search=(Description:luxury OR Category:luxury^3) AND Tags:'air con'*&$select=HotelId, HotelName, Category, Tags, Description&$count=true&queryType=full
+
+**Improve the relevance of results by adding scoring profiles**
+cog search uses BM25 similarity ranking algo.
+how can we alter to fit criteria we need too?
+
+***how search scores are calculated***
+- score = F(# of times identified search terms appear in doc, doc size, rarity of each of the terms) \n
+search results are ordered by their search score, highest first; where identical score, break tie by adding $orderby clause
+
+***improve the score for more relevant documents***
+scoring profiles to enhance document returns
+approaches:
+1. most straightforward scoring profile defines different weights for fields in an index
+profile can include functions, e.g. distance or freshness
+consider, defining the boosting duration applied to newer documents before they score teh same as older document
+*key point: instead of boosting a specific term in a search request, you can aplpy a scoring profile to an index so that fields are boosted automatically for all queries
+
+***add a weighted scoring profile***
+100 scoring profiles to a search index \n
+azure portal simplest waqy to create. How too:
+1. go to search service
+2. select indexes, select index to add scoring profile
+3. select scoring profile
+4. select + Add scoring profile
+5. enter unique name in profile name
+6. set scoring profile as default to be applied to all searches select set as default profile
+7. in field name, select field; then weight
+8. save
+
+
+
+
+
+
 ## bld ml custom skill for cog search
 ## search data outside azure platform in cog search using data factory
 ## maintain cog search solution
