@@ -592,7 +592,7 @@ consider, defining the boosting duration applied to newer documents before they 
 *key point: instead of boosting a specific term in a search request, you can aplpy a scoring profile to an index so that fields are boosted automatically for all queries
 
 ***add a weighted scoring profile***
-100 scoring profiles to a search index \n
+100 scoring profiles to a search index
 azure portal simplest waqy to create. How too:
 1. go to search service
 2. select indexes, select index to add scoring profile
@@ -602,6 +602,18 @@ azure portal simplest waqy to create. How too:
 6. set scoring profile as default to be applied to all searches select set as default profile
 7. in field name, select field; then weight
 8. save
+
+***use functions in a scoring profile***
+available functions:
+|function|description
+--|--|
+|magnitude|alter scores based on a range of values for a numeric field|
+|freshness|alter scores based on the freshness of docs as given by a datetimeoffset field|
+|distance|alter scores based on the distance between a reference location and a GeographyPoint field|
+|tag|alter scores based on common tag values in docs and queries|
+
+**Improve an index with analyzers and tokenized terms**
+
 
 
 
