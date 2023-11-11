@@ -938,10 +938,137 @@ search=(Description:luxury OR Category:luxury)&orderby=geo.distance(Location, ge
 needs 3 or more points to create polygon. Additionally points must be specified in counterclockwise order and must be closed i.e. first and last points must be the same. example below:
 search=(Description:luxury OR Category:luxury) AND geo.intersects(Location, geography'POLYGON((2.32 48.91, 2.27 48.91, 2.27 48.60, 2.32 48.60, 2.32 48.91))')&$select=HotelId, HotelName, Category, Tags, Description&$count=true
 
-
+*Note: adding translation to skillset for enhanced search. The Azure portal assumes the first field in the document needs to be translated
 
 ## bld ml custom skill for cog search
+learning achievements
+- understand how to use custom ml skillset
+- use aml to enrich cog search indexes
+
+**Understand how to use a custom Azure Machine Learning skillset**
+using ml custom works same as adding anoy othe rcustom skill to search index (AmlSkill)
+
+***custom AmlSkill schema***
+enrichment happens at document level
+example:
+{
+      "@odata.type": "#Microsoft.Skills.Custom.AmlSkill",
+      "name": "AML name",
+      "description": "AML description",
+      "context": "/document",
+      "uri": "https://[Your AML endpoint]",
+      "key": "Your AML endpoint key",
+      "resourceId": null,
+      "region": null,
+      "timeout": "PT30S",
+      "degreeOfParallelism": 1,
+      "inputs": [
+        {
+          "name": "field name in the AML model",
+          "source": "field from the document in the index"
+        },
+        {
+          "name": "field name in the AML model",
+          "source": "field from the document in the index"
+        },
+
+      ],
+      "outputs": [
+        {
+          "name": "result field from the AML model",
+          "targetName": "result field in the document"
+        }
+      ]
+    }
+note: uri has to use https endpoint. above example has timeout of 30 seconds. depending on infra, increase parallelism and timeout based on needs
+- best way to manage efficiency of aml skill is to scale up kubernetes inference cluster
+
+index for docs needs a field to store results from AML model. then add output field mapping to store results from custom skill set to the field on the doc in the index
+json output field mapping example to complete:
+"outputFieldMappings": [
+    {
+      "sourceFieldName": "/result field in the document",
+      "targetFieldName": "result field from the AML model"
+    }
+  ]
+
+***Enrich a search index using an Azure Machine Learning model***
+1. create model
+2. alter scoring code calls model to allow it to be used by custom search skill
+3. create kubernetes cluster to host an endpoint for model
+
+***create aml workspace***
+creates storage, key store, application insights resource
+
+***create and train model in ml studio***
+must be registered in aml learning studio to deploy model to web service
+
+***alter how model works to allow it to be called by the aml custom skill***
+code that handles data and passes it to the model needs to be changed to handle single rows. json response from model should also contain only the output prediction e.g.
+data is an array of json objects:
+[ 
+    {
+        "attribute-1": null,
+        "attribute-2": null
+    },
+    {
+        "attribute-1": null,
+        "attribute-2": null
+    },
+    {
+        "attribute-1": null,
+        "attribute-2": null
+    }
+]
+
+then python scoring code will ahve to process the data a row at a time:
+data = json.loads(data)
+for row in data:
+    for key, val in row.items():
+        input_entry[key].append(decode_nan(val))
+
+to change input to single record python code needs to become:
+data = json.loads(data)
+for key, val in data.items():
+    input_entry[key].append(decode_nan(val))
+
+response from scoring returns to whole json doc:
+return json.dumps({"result": result.data_frame.values.tolist()})
+
+custom skill needs to map to a single response from the model; code should return json of only the last attribute
+output = result.data_frame.values.tolist()
+# return the last column of the the first row of the dataframe
+return {
+    "predicted_outcome": output[0][-1]
+}
+
+***create an endpoint for your model to use***
+|restrictions|
+--|
+|ml studio deploys to real-time, batch, or web service endpoints. currently custom AmlSkill only supports web service endpoints|
+|endpoint has to be an azure kubernetes service, container instances aren't supported|
+
+aml stuido creates and manages cluster natively, don't need to manually create. done in the compute section of studio.
+
+***connect aml custom skill to endpoint***
+update cog search service
+1. enrich search index by adding new field to include output for the model.
+2. update index skillset and add #Microsoft.Skills.Custom.AmlSkill
+3. change indexer to map the output from custom skill to field created
+4. rerun indexer to enrich index with AML model
+
+
 ## search data outside azure platform in cog search using data factory
+learning achievements
+- azure data factory to copy data into cog search index
+- cog search push api to add an index from any external data source
+
+
+
+
+
+
+
 ## maintain cog search solution
 ## use semantic search to get better search result in cog search
 ## improve search results using vector search in cog search
