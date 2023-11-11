@@ -257,7 +257,6 @@ example:
   ]
 }
 
-
 ## create knowledge store with cog search
 learning achievements:
 - create a knowledge store from cog search pipeline
@@ -458,7 +457,7 @@ function app needs to know 5 things:
 3. map response from skillset into the index
 
 ***add field to existing index***
-add JSOn below, which adds a compounded field to the index to store the class in a category field that is searchable. the second confidenceScore field stores the confidence percentage in a double field
+add Json below, which adds a compounded field to the index to store the class in a category field that is searchable. the second confidenceScore field stores the confidence percentage in a double field
 {
   "name": "classifiedtext",
   "type": "Collection(Edm.ComplexType)",
@@ -613,10 +612,331 @@ available functions:
 |tag|alter scores based on common tag values in docs and queries|
 
 **Improve an index with analyzers and tokenized terms**
+***analyzers in cog search***
+- processing examples: text should be broken into words (by whitespace and punctuation characters as delims); stopswords should be removed; reduce to root (stemming)
 
+analyzers run processing examples in cognitive search. lucene analyzer used if none specified
+alternative built-ins:
+- language analyzers: advanced capabilities for specific languages (e.g. lemmatization, word decompounding, entity recognition. 50 analyzers for different languages)
+- specialized: language-agnostic and used for specialized fields such as zip codes or product IDs. e.g. PatternAnalyzer and specify a reg ex to match token separators
 
+***what is a customer analyzer***
+constsist of:
+- character filters: process string before it is tokenized
+- tokenizer: divide text into tokens to be added to index
+- token filters: remove or modify the tokens emitted by tokenizer
 
+***character filters***
+1. html_strip: remvoes html constructs such as tags and attributes
+2. mapping: enables specify mappings that replace 1 string with another. e.g. replace TX with Texas
+3. pattern_replace: specify a reg ex identifying patterns in input text and how matching text should be replaced
 
+***tokenizers***
+usually single word, but might want to create unusual tokens e.g.:
+- full postal address
+- compelte url or email
+- words based on grammar of specific language
+
+13 tokenizers to choose from:
+1. classic: tokenizes based on grammar for european languges
+2. keyword: tokenizer emits entire input as a single token. for fields that should always be indexed as 1 value
+3. lowercase: divides text at non-letters and modifies resulting token to all lower case
+4. microsoft_language_tokenizer: divides text based on grammer of language specified
+5. pattern: divides text where matches reg ex specified
+6. whitepace: tokenizer divides text wherever there's white space
+[custom analyzer_and_all_tokenizer docs search for Add custom analyzers to string fields in an Azure Cognitive Search index]
+
+***token fitlers***
+extra processing after tokenization
+41 different token filters available:
+1. language-specific filters, such as arabic_normalization: apply language specific grammar rules to ensure forms of words are removed and replaced with roots
+2. apostrophe: filter remvoes any apostrophe from a token and any characters after the apostrophe
+3. classic: removes english possessives and dots from acronyms
+4. keep: remvoes any token that doesn't include one or more words from a list you specify
+5. length: removes any token that is longer than your specified min or shorter than your specified amx
+6. trim: removes any leading and trailing white space from tokens
+
+***create a customer analyzer***
+must use json code below. can't specify custom index in azure portal
+can include only one tokenizer but one or more character filters and one or more token fitlers
+analyzers section of hte index at design time
+uniuqe name and set the @odata.type : '#Microsoft.Azure.Search.CustomeAnalyzer'
+"analyzers":(optional)[
+   {
+      "name":"ContosoAnalyzer",
+      "@odata.type":"#Microsoft.Azure.Search.CustomAnalyzer",
+      "charFilters":[
+         "WebContentRemover"
+      ],
+      "tokenizer":"IcelandicTokenizer",
+      "tokenFilters":[
+         "ApostropheFilter"
+      ]
+   }
+],
+"charFilters":(optional)[
+   {
+      "name":"WebContentRemover",
+      "@odata.type":"#html_strip"
+   }
+],
+"tokenizers":(optional)[
+   {
+      "name":"IcelandicTokenizer",
+      "@odata.type":"#microsoft_language_tokenizer",
+      "language":"icelandic",
+      "isSearchTokenizer":false,
+   }
+],
+"tokenFilters":(optional)[
+   {
+      "name":"ApostropheFilter",
+      "@odata.type":"#apostrophe"
+   }
+]
+
+***test a custom analyzer***
+analyze text function REST API to submit test text and ensure analyzer returns tokens correctly
+any rest testing tool to formulate requests such as Postman application
+
+REST request example: 
+POST https://<search service name>.search.windows.net/indexes/<index name>/analyze?api-version=<api-version>
+   Content-Type: application/json
+   api-key: <api key>
+
+- replace <search service name> with cog search resource
+- replace <index name> with name of index that includes the custom analyzer
+- replace <api-version> with the version number of the rest api
+- replace <api-key> with access key for cog search resource
+
+request must also include a json body like:
+{
+  "text": "Test text to analyze.",
+  "analyzer": "<analyzer name>"
+}
+
+***use a custom analyzer for a field***
+once defined and tested now configure index to use it
+analyzer can be specified for each field in index
+
+analzyer field when you want to use the same analyzer for both indexing and search:
+"fields": [
+ {
+   "name": "IcelandicDescription",
+   "type": "Edm.String",
+   "retrievable": true,
+   "searchable": true,
+   "analyzer": "ContosoAnalyzer",
+   "indexAnalyzer": null,
+   "searchAnalyzer": null
+ },
+
+you can also use a different analyzer when indexing the field and when searching the field. different set of processing steps when you index a field to when you analyze a query. use the configuration below if you need different set of processing steps
+"fields": [
+ {
+   "name": "IcelandicDescription",
+   "type": "Edm.String",
+   "retrievable": true,
+   "searchable": true,
+   "analyzer": null,
+   "indexAnalyzer": "ContosoIndexAnalyzer",
+   "searchAnalyzer": "ContosoSearchAnalyzer"
+ },
+
+**Enhance an index to include multiple languages**
+- can add manually by providinga ll translated text fields in all different lanugages you wnat to support
+- choose azure ai sdervices for translated text through enrichment pipeline
+
+1. how to add fields iwht different languages to index
+2. constrain results to fields wiht specific languages
+3. create scoring profile to boost native language of your end users
+
+***add language specific fields***
+1. identify all fields that need translation
+2. duplicate those fields for each language you want to support and add corresponding language analyzer [docs](https://learn.microsoft.com/en-us/azure/search/index-add-language-analyzers#supported-language-analyzers)
+json definition example:
+{
+      "name": "description",
+      "type": "Edm.String",
+      "facetable": false,
+      "filterable": false,
+      "key": false,
+      "retrievable": true,
+      "searchable": true,
+      "sortable": false,
+      "analyzer": "en.microsoft",
+      "indexAnalyzer": null,
+      "searchAnalyzer": null,
+      "synonymMaps": [],
+      "fields": []
+    },
+    {
+      "name": "description_de",
+      "type": "Edm.String",
+      "facetable": false,
+      "filterable": false,
+      "key": false,
+      "retrievable": true,
+      "searchable": true,
+      "sortable": false,
+      "analyzer": "de.microsoft",
+      "indexAnalyzer": null,
+      "searchAnalyzer": null,
+      "synonymMaps": [],
+      "fields": []
+    },
+    {
+      "name": "description_fr",
+      "type": "Edm.String",
+      "facetable": false,
+      "filterable": false,
+      "key": false,
+      "retrievable": true,
+      "searchable": true,
+      "sortable": false,
+      "analyzer": "fr.microsoft",
+      "indexAnalyzer": null,
+      "searchAnalyzer": null,
+      "synonymMaps": [],
+      "fields": []
+    },
+    {
+      "name": "description_it",
+      "type": "Edm.String",
+      "facetable": false,
+      "filterable": false,
+      "key": false,
+      "retrievable": true,
+      "searchable": true,
+      "sortable": false,
+      "analyzer": "it.microsoft",
+      "indexAnalyzer": null,
+      "searchAnalyzer": null,
+      "synonymMaps": [],
+      "fields": []
+    },
+
+***limit the fields for language***
+searchFields and select properties are key here
+
+***enrich an index with multiple languages using AI services***
+steps:
+1. add fields for each language
+2. add skill for each language
+3. map translated text to correct fields
+
+***add japanese and ukrainian examples***
+{
+  "name": "description_jp",
+  "type": "Edm.String",
+  "facetable": false,
+  "filterable": false,
+  "key": false,
+  "retrievable": true,
+  "searchable": true,
+  "sortable": false,
+  "analyzer": "ja.microsoft",
+  "indexAnalyzer": null,
+  "searchAnalyzer": null,
+  "synonymMaps": [],
+  "fields": []
+},
+{
+  "name": "description_uk",
+  "type": "Edm.String",
+  "facetable": false,
+  "filterable": false,
+  "key": false,
+  "retrievable": true,
+  "searchable": true,
+  "sortable": false,
+  "analyzer": "uk.microsoft",
+  "indexAnalyzer": null,
+  "searchAnalyzer": null,
+  "synonymMaps": [],
+  "fields": []
+}
+
+***add translation skillsets continuation of japanese and ukranian example***
+"skills": [
+  {
+    "@odata.type": "#Microsoft.Skills.Text.TranslationSkill",
+    "name": "#1",
+    "description": null,
+    "context": "/document/description",
+    "defaultFromLanguageCode": "en",
+    "defaultToLanguageCode": "ja",
+    "suggestedFrom": "en",
+    "inputs": [
+      {
+        "name": "text",
+        "source": "/document/description"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "translatedText",
+        "targetName": "description_jp"
+      }
+    ]
+  },
+  {
+    "@odata.type": "#Microsoft.Skills.Text.TranslationSkill",
+    "name": "#2",
+    "description": null,
+    "context": "/document/description",
+    "defaultFromLanguageCode": "en",
+    "defaultToLanguageCode": "uk",
+    "suggestedFrom": "en",
+    "inputs": [
+      {
+        "name": "text",
+        "source": "/document/description"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "translatedText",
+        "targetName": "description_uk"
+      }
+    ]
+  }
+]
+
+***map translated output into index final step of japanese/ukranian example***
+update indexer to map translated text into the index
+"outputFieldMappings": [
+  {
+    "sourceFieldName": "/document/description/description_jp",
+    "targetFieldName": "description_jp"
+  },
+  {
+    "sourceFieldName": "/document/description/description_uk",
+    "targetFieldName": "description_uk"
+  }
+]
+
+**Improve search experience by ordering results by distance from a given reference point**
+near a physical point or within a bounded area
+
+***what are geo-spatial functions***
+2 functions for locaiton info. index must include location for results. Location fields should have the datatype Edm.GeographyPoint and store lat?long
+1. geo.distance: function returns distance in a straight line across earth's surface from point you specify to the location of search result
+2. geo.intersects: function returns true if location of search result is inside a polygon specified
+
+***use geo.distance function***
+returns results in kilometers
+location: name of field that stores location
+geography'POINT: longitude and latitude
+le 5: inclusive results if geo.distance function returns a number less than or equal to the set 5 kilos (example)
+- important note: when you use geo.distance in a filter, the equal (eq) and not equal (ne) operators are not supported. instead, use lt, le, ft, or ge
+
+can use geo.distance in orderby clause e.g.:
+search=(Description:luxury OR Category:luxury)&orderby=geo.distance(Location, geography'POINT(2.294481 48.858370)') asc&$select=HotelId, HotelName, Category, Tags, Description&$count=true
+
+***use geo.intersects function***
+needs 3 or more points to create polygon. Additionally points must be specified in counterclockwise order and must be closed i.e. first and last points must be the same. example below:
+search=(Description:luxury OR Category:luxury) AND geo.intersects(Location, geography'POLYGON((2.32 48.91, 2.27 48.91, 2.27 48.60, 2.32 48.60, 2.32 48.91))')&$select=HotelId, HotelName, Category, Tags, Description&$count=true
 
 
 
