@@ -1037,7 +1037,7 @@ return json.dumps({"result": result.data_frame.values.tolist()})
 
 custom skill needs to map to a single response from the model; code should return json of only the last attribute
 output = result.data_frame.values.tolist()
-# return the last column of the the first row of the dataframe
+//return the last column of the the first row of the dataframe
 return {
     "predicted_outcome": output[0][-1]
 }
