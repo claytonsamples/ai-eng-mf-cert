@@ -1063,10 +1063,252 @@ learning achievements
 - azure data factory to copy data into cog search index
 - cog search push api to add an index from any external data source
 
+most flexible way to get data into index is to push data into cog search
+
+**index data from external data sources using azure data factory**
+***push data into search index using azure data factory***
+factory comes connected to ~100 different data stores
+sink is equal to a source or target in pipelines
+
+***create factory pipeline to push data into a search index***
+1. create cog search index with all the fields want to store data
+2. create pipeline with a copy data step
+3. create data source connection to where data resides
+4. create sink to connect to your search index
+5. map fields from source data to search index
+6. run pipeline to push data into index
+
+Example: customer data in json format [example](https://learn.microsoft.com/en-us/training/modules/search-data-outside-azure-platform-cognitive-search/02-index-data-from-external-data-sources-factory)
+
+***create search index***
+[learning_module_example](https://learn.microsoft.com/en-us/training/modules/search-data-outside-azure-platform-cognitive-search/02-index-data-from-external-data-sources-factory)
+[data factory docs](https://learn.microsoft.com/en-us/azure/data-factory/lab-data-flow-data-share)
+
+**Index any data using the Azure Cognitive Search push API**
+***supported rest api operations***
+two api operations for cog search [search and managmenet]. search is the focus for this module
+|feature|operations|
+--|--|
+|index|create,delete,updated,and configure|
+|document|get,add,update,and delete|
+|indexer|configure data sources and scheduling on limited data sources|
+|skillset|get,create,delete,list,and update|
+|synonym map|get,create,delete,list,and update|
+
+***how to call teh search rest api***
+- use https endpoint (over port 443) provided by search service, you must include an api-version in URI
+- request header must include an api-key attribute
+
+***add data to an index***
+use http post request using the indexes feature in this format
+POST https://[service name].search.windows.net/indexes/[index name]/docs/index?api-version=[api-version]
+
+body of request needs to let rest endpoint know action to take on the doc, which doc to apply action too, and what data to use
+{  
+  "value": [  
+    {  
+      "@search.action": "upload (default) | merge | mergeOrUpload | delete",  
+      "key_field_name": "unique_key_of_document", (key/value pair for key field from index schema)  
+      "field_name": field_value (key/value pairs matching index schema)  
+        ...  
+    },  
+    ...  
+  ]  
+}
+
+|action|description|
+--|--|
+|upload|similar to upsert in sql, doc will be created or replaced|
+|merge|merge updates an existing doc with specific fields. merge will fail if no doc can be found|
+|mergeOrUpload|merge updates an existing doc with specified fields, and uploads it if the doc doesn't exist|
+|delete|deletes the whole document, you only need to specify the key_field_name|
+response 200 if successful [full response codes docs](https://learn.microsoft.com/en-us/rest/api/searchservice/addupdate-or-delete-documents#response)
+
+full example (can add as many docs in value array as you want. optimal performance consider batching max 1k docs or 16 MB):
+{
+  "value": [
+    {
+      "@search.action": "upload",
+      "id": "5fed1b38309495de1bc4f653",
+      "firstName": "Sims",
+      "lastName": "Arnold",
+      "isAlive": false,
+      "age": 35,
+      "address": {
+        "streetAddress": "Sumner Place",
+        "city": "Canoochee",
+        "state": "Palau",
+        "postalCode": "1558"
+      },
+      "phoneNumbers": [
+        {
+          "phoneNumber":  {
+            "type": "home",
+            "number": "+1 (830) 465-2965"
+          }
+        },
+        {
+          "phoneNumber":  {
+            "type": "home",
+            "number": "+1 (889) 439-3632"
+          }
+        }
+      ]
+    }
+  ]
+}
+
+***use .NET core to index any data***
+powershell client library with NuGet
+dotnet add package Azure.Search.Documents --version 11.4.0
+
+index performance based on 6 key factors
+1. search service tier and how many replicas and partitions enabled
+2. complexity of index schema. reduce how many properties (searchable, facetable, sortable) each field has.
+3. number of docs in each batch, best size depends on index schema and size of docs
+4. multithreaded approach
+5. handling errors and throttling. use exponential backoff retry strategy
+6. where data resides, try index data as close to search index. e.g. run uploads from inside azure environment
+
+***work out optimal batch size***
+public static async Task TestBatchSizesAsync(SearchClient searchClient, int min = 100, int max = 1000, int step = 100, int numTries = 3)
+{
+    DataGenerator dg = new DataGenerator();
+
+    Console.WriteLine("Batch Size \t Size in MB \t MB / Doc \t Time (ms) \t MB / Second");
+    for (int numDocs = min; numDocs <= max; numDocs += step)
+    {
+        List<TimeSpan> durations = new List<TimeSpan>();
+        double sizeInMb = 0.0;
+        for (int x = 0; x < numTries; x++)
+        {
+            List<Hotel> hotels = dg.GetHotels(numDocs, "large");
+
+            DateTime startTime = DateTime.Now;
+            await UploadDocumentsAsync(searchClient, hotels).ConfigureAwait(false);
+            DateTime endTime = DateTime.Now;
+            durations.Add(endTime - startTime);
+
+            sizeInMb = EstimateObjectSize(hotels);
+        }
+
+        var avgDuration = durations.Average(timeSpan => timeSpan.TotalMilliseconds);
+        var avgDurationInSeconds = avgDuration / 1000;
+        var mbPerSecond = sizeInMb / avgDurationInSeconds;
+
+        Console.WriteLine("{0} \t\t {1} \t\t {2} \t\t {3} \t {4}", numDocs, Math.Round(sizeInMb, 3), Math.Round(sizeInMb / numDocs, 3), Math.Round(avgDuration, 3), Math.Round(mbPerSecond, 3));
+
+        // Pausing 2 seconds to let the search service catch its breath
+        Thread.Sleep(2000);
+    }
+
+    Console.WriteLine();
+}
 
 
+***Implement exponential backoff retry strategy***
+index starts to throttle requests due to overload a 503 (request rejected due to heavy load) or 207 (some documents failed in batch) status is received
+good strategy is to backoff. back off means pausing for some time before ertrying request again. 
+// Implement exponential backoff
+do
+{
+    try
+    {
+        attempts++;
+        result = await searchClient.IndexDocumentsAsync(batch).ConfigureAwait(false);
 
+        var failedDocuments = result.Results.Where(r => r.Succeeded != true).ToList();
 
+        // handle partial failure
+        if (failedDocuments.Count > 0)
+        {
+            if (attempts == maxRetryAttempts)
+            {
+                Console.WriteLine("[MAX RETRIES HIT] - Giving up on the batch starting at {0}", id);
+                break;
+            }
+            else
+            {
+                Console.WriteLine("[Batch starting at doc {0} had partial failure]", id);
+                Console.WriteLine("[Retrying {0} failed documents] \n", failedDocuments.Count);
+
+                // creating a batch of failed documents to retry
+                var failedDocumentKeys = failedDocuments.Select(doc => doc.Key).ToList();
+                hotels = hotels.Where(h => failedDocumentKeys.Contains(h.HotelId)).ToList();
+                batch = IndexDocumentsBatch.Upload(hotels);
+
+                Task.Delay(delay).Wait();
+                delay = delay * 2;
+                continue;
+            }
+        }
+
+        return result;
+    }
+    catch (RequestFailedException ex)
+    {
+        Console.WriteLine("[Batch starting at doc {0} failed]", id);
+        Console.WriteLine("[Retrying entire batch] \n");
+
+        if (attempts == maxRetryAttempts)
+        {
+            Console.WriteLine("[MAX RETRIES HIT] - Giving up on the batch starting at {0}", id);
+            break;
+        }
+
+        Task.Delay(delay).Wait();
+        delay = delay * 2;
+    }
+} while (true);
+
+***use threading to improve performance***
+
+sample code to complete doc uploading app by combining backoff with threading
+public static async Task IndexDataAsync(SearchClient searchClient, List<Hotel> hotels, int batchSize, int numThreads)
+        {
+            int numDocs = hotels.Count;
+            Console.WriteLine("Uploading {0} documents...\n", numDocs.ToString());
+
+            DateTime startTime = DateTime.Now;
+            Console.WriteLine("Started at: {0} \n", startTime);
+            Console.WriteLine("Creating {0} threads...\n", numThreads);
+
+            // Creating a list to hold active tasks
+            List<Task<IndexDocumentsResult>> uploadTasks = new List<Task<IndexDocumentsResult>>();
+
+            for (int i = 0; i < numDocs; i += batchSize)
+            {
+                List<Hotel> hotelBatch = hotels.GetRange(i, batchSize);
+                var task = ExponentialBackoffAsync(searchClient, hotelBatch, i);
+                uploadTasks.Add(task);
+                Console.WriteLine("Sending a batch of {0} docs starting with doc {1}...\n", batchSize, i);
+
+                // Checking if we've hit the specified number of threads
+                if (uploadTasks.Count >= numThreads)
+                {
+                    Task<IndexDocumentsResult> firstTaskFinished = await Task.WhenAny(uploadTasks);
+                    Console.WriteLine("Finished a thread, kicking off another...");
+                    uploadTasks.Remove(firstTaskFinished);
+                }
+            }
+
+            // waiting for the remaining results to finish
+            await Task.WhenAll(uploadTasks);
+
+            DateTime endTime = DateTime.Now;
+
+            TimeSpan runningTime = endTime - startTime;
+            Console.WriteLine("\nEnded at: {0} \n", endTime);
+            Console.WriteLine("Upload time total: {0}", runningTime);
+
+            double timePerBatch = Math.Round(runningTime.TotalMilliseconds / (numDocs / batchSize), 4);
+            Console.WriteLine("Upload time per batch: {0} ms", timePerBatch);
+
+            double timePerDoc = Math.Round(runningTime.TotalMilliseconds / numDocs, 4);
+            Console.WriteLine("Upload time per document: {0} ms \n", timePerDoc);
+        }
+
+   
 
 
 ## maintain cog search solution
