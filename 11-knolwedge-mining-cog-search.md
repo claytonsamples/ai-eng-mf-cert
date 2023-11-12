@@ -1308,9 +1308,68 @@ public static async Task IndexDataAsync(SearchClient searchClient, List<Hotel> h
             Console.WriteLine("Upload time per document: {0} ms \n", timePerDoc);
         }
 
-   
-
-
 ## maintain cog search solution
+**Manage security of an Azure Cognitive Search solution**
+how to secure search solution. focused on where data is encrypted and how to secure the inbound and outbound data flows. finally, learn how to restrict access to search results for specific users or groups
+***overview of security approaches***
+focus on 3 areas to secure search solution:
+1. inbound search requests made by users to search solution
+2. outbound requests from your search solution to other servers to index docs
+3. restricting access at doc level per user search request
+
+***data encryption***
+azure encrypts data it stores at rest with service-managed keys includes indexes, data sources, synonym maps, skillsets, and even indexer definitions
+data in transit is encrypted using standard HTTPS TLS 1.3 encryption over port 443
+[docs for how to use customer-managed keys for encryption](https://learn.microsoft.com/en-us/azure/search/search-security-manage-encryption-keys)
+
+***secure inbound traffic***
+azure allows, for free, firewall to public endpoint (enable acccess from specific IP addresses only)
+on-premises search can be hardened with:
+1. expressroute circuit
+2. azure gateway
+3. app service
+4. can also change public endpoint to use azure private link; need to set up azure virtual network and other resources increasing cost
+[private endpoint docs](https://learn.microsoft.com/en-us/azure/search/service-create-private-endpoint)
+
+***authenticate requests to your search solution***
+default auth is key-based and there are 2 different kinds:
+1. admin keys: grant write permissions and right to query system info (max 2 admin keys per search service)
+2. query keys: read permissions and used by users or apps to query indexes (max of 50 query keys per search service)
+
+role-based access control [docs](https://learn.microsoft.com/en-us/azure/search/search-security-rbac):
+- use to define roles to administer service or,
+- roles with access to create, load, and query indexes
+
+built-in roles are:
+1. owner: full access to all search resources
+2. contributor: same as owner, but without ability to assign roles or chagne authorizations
+3. reader: partial service info
+
+a role to manage data plane e.g. search indexes or data sources use one of:
+- search service contributor: role for search service admin (same as contributor role) and content (indexes, indexers, data sources, and skillsets)
+- search index data contributor: role for devs or index owners who will import, refresh, or query docs collection of an index
+- search index data reader: read-only access role for apps and users who only need to run queries
+
+***secure outbound traffic***
+outbound indexes source data or enriches using AI
+can restrict access using firewall and configure to only allow ip address of azure cog search service. if enriching with ai need to allow ip addresses in azurecogsearch service tag
+
+***secure data at the document level***
+[entra id security filters docs](https://learn.microsoft.com/en-us/azure/search/search-security-trimming-for-azure-search-with-aad)
+must update each document in search index. must add new security field to every doc that contains the user or group IDs that can access it. security field needs to be filterable
+
+add search.in filter to all search queries e.g. HTTP POST request:
+{
+   "filter":"security_field/any(g:search.in(g, 'user_id1, group_id1, group_id2'))"  
+}
+
+**Optimize performance of an Azure Cognitive Search solution**
+
+
+
+
+
+
+
 ## use semantic search to get better search result in cog search
 ## improve search results using vector search in cog search
