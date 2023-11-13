@@ -1364,6 +1364,57 @@ add search.in filter to all search queries e.g. HTTP POST request:
 }
 
 **Optimize performance of an Azure Cognitive Search solution**
+performance can be affected by size and complexity of indexes
+also should be aware of how to write efficient queries and service tier
+
+***measure current search performance***
+create baseline benchmark
+1. enable diagnostic logging using Log analytics [failure path image](https://learn.microsoft.com/en-us/training/wwl-data-ai/maintain-azure-cognitive-search-solution/media/possible-performance-issues.png)
+
+***check if search service is throttled***
+[throttling image](https://learn.microsoft.com/en-us/training/wwl-data-ai/maintain-azure-cognitive-search-solution/media/throttle-baseline.png#lightbox0
+
+go to monitoring, select logs, in new query use below:
+AzureDiagnostics
+| where TimeGenerated > ago(7d)
+| summarize count() by resultSignature_d 
+| render barchart
+
+***check the performance of individual queries***
+best way is with client tool like postman
+elapsed time will always be returned by cog search
+
+***optimize your index size and schema***
+smaller and optimized indexes, faster cog search responds
+- check documents for relevance and inclusion and need to be searchable
+- if can't remove, can reduce complexity of schema? do all fields ned to be searchable that currently are? Do you still need same skillsets?
+
+***improve the performance of your queries***
+checklist
+1. only specify fields you need to search using searchFields param. more fields more processing
+2. return smallest number of fields you need to render on search results page. more data takes more time
+3. avoid partial search terms like prefix search or reg ex. more computationally expensive
+4. avoid high skip values. forces search engine to retrieve and rank larger volumes of data
+5. limit using facetable and filterable fields to low cardinality data
+6. use search functions instead of individual values in filter criteria
+
+after all these check service tier and add partitions. physical storage where index resides
+
+***use best service tier for your search needs***
+|Tier|	Type	|Storage|	Replicas|	Partitions|
+|F	|Free	|50 MB	|1|	1|
+|B	|Basic	|2 GB	|3|	1|
+|S1	|Standard	|25 GB/Partition	|12	|12|
+|S2|	Standard|	100 GB/Partition|	12	|12|
+|S3	|Standard	|200 GB/Partition	|12|	12|
+|S3HD|	High-density|	200 GB/Partition	|12|	3|
+|L1|	Storage Optimized	|1 TB/Partition|	12|	12|
+|L2|	Storage Optimized	|2 TB/Partition|	12|	12|
+
+***manage costs of azure cog search solution***
+
+
+
 
 
 
