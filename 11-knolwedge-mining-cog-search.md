@@ -1411,13 +1411,56 @@ after all these check service tier and add partitions. physical storage where in
 |L1|	Storage Optimized	|1 TB/Partition|	12|	12|
 |L2|	Storage Optimized	|2 TB/Partition|	12|	12|
 
-***manage costs of azure cog search solution***
+**manage costs of azure cog search solution**
+costs vary based on capacity and features
+[azure cog search calculator 4 baseline](https://azure.microsoft.com/pricing/details/search/)
 
+***estimate search solution baseline costs***
+when estimating cog search don't forget data ingestion and storage are not included in baseline estimates
+cost-effective use has to be constantly evaluated from capacity optimization, tier used, data being searched, to features being used
 
+***understand the billing model***
+[service limit docs](https://learn.microsoft.com/en-us/azure/search/search-limits-quotas-capacity)
 
+other premium features
+|features|unit|
+--|--|
+|Indexer |usage	Per 1000 API calls|
+|Image extraction| (AI enrichment)	Per 1000 text records|
+|Built-in skills (AI enrichment)	Number of transactions, billed at the same rate as if you had performed the task by calling Azure AI Services directly. You can process 20 documents per indexer per day for free. Larger or more frequent workloads require a multi-resource Azure AI Services key.|
+|Custom Entity Lookup |skill (AI enrichment)	Per 1000 text records|
+|Semantic Search	|Number of queries of "queryType=semantic", billed at a progressive rate|
+|Private Endpoints	|Billed as long as the endpoint exists, and billed for bandwidth|
 
+***tips to reduce costs***
+1. minimize bandwidth costs by reducing regions. ideally all resources should be in the same region
+2. predictable patterns of indexing data, consider scaling up inside search tier. scale back down for regular querying
+3. keep requests and responses inside azure datacenter boundary, use azure web-app front end as search app
+4. enable enrichment caching if using ai enrichment on blob storage
 
+**Improve reliability of an Azure Cognitive Search solution**
+***make search service highly available***
+1st and easiest way is to increase replicas
+- 2 replicas guarantees 99.9% availability for search queries
+- 3 or more replicas guarnatees 99.9% availability for search queries and indexing
+2nd way is availability zones
 
+***distribute search solution***
+if priority is availability and performance; host multiple versions of search in different geographical regions
+benefits are:
+- protection against regional failures; cog search isn't instant failover
+- global distributed users, having resource near them improves response speed
+
+work to do if replicate indexes across regions e.g.:
+1. sames indexers in same region ingesting same source data
+2. push api to automatically update all indexes in each region
+3. manage search requests through azure traffic manager
+
+***back-up options***
+[docs](https://github.com/Azure-Samples/azure-search-dotnet-samples/tree/master/index-backup-restore)
+summary: create own tool using JSON
+
+**Monitor an Azure Cognitive Search solution**
 
 
 
