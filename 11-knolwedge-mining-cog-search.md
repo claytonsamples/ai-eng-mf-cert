@@ -1461,8 +1461,53 @@ work to do if replicate indexes across regions e.g.:
 summary: create own tool using JSON
 
 **Monitor an Azure Cognitive Search solution**
+***Azure cog search in azure monitor***
+out-of-box: search latency, queries per second, % of throttled queries
+activate log analytics for access too:
+1. azureactivity: shows tasks that have been executed like scaling search service
+2. azurediagnostics: all query and indexing operations
+3. azuremetrics: data used for metrics to establish health and performance of search service
 
+***use metrics to see diagnostic data visually***
+within monitoring section navigate to metrics, charts are there
 
+***Write Kusto queries against your search solutions logs***
+select logs under monitoring:
+ex:
+AzureDiagnostics
+| summarize count() by OperationName
+[list of useful queries](https://learn.microsoft.com/en-us/training/modules/maintain-azure-cognitive-search-solution/06-monitor-azure-cognitive-search-solution)
+
+***create alerts for common search solution issues***
+list of common alerts to consider
+1. search latency: using the metric signal, specify what latency triggers the alert
+2. throttle search percentage: metric signal, specify percentage
+3. delete search service: log signal, notify if search service is deleted
+4. stop search service: log signal, notify if stopped which happens when search is scaled up, down or needs to be restarted
+
+**debug search issues using azure portal**
+***explore how to use debug session tool in azure cog search***
+debug session tool allows visibility into pipeline of doc. go into each skill make changes and rerun indexer. when ready can rerun and deploy index
+debug session copies index to debug which includes data, indexer, skillset, enriched version of doc that is final index
+
+***debug a skillset with debug session***
+create debug session:
+1. overview pane, search management navigate to debug session
+2. add debug
+3. name debug session
+4. storage connection string: general purpose storage for caching debug session
+5. indexer template: select indexer that drives skillset to debug
+6. document: select first doc in index or select specific doc
+7. save session
+
+***explore edit a skill***
+debug session enables review inputs and outputs of skill and even see json output
+in dependency graph select skill
+
+***validate field mappings***
+indexers can be modified if data doesn't match schema of target index
+field mappings reshape and fix mismatch in data during indexing process
+1. select skill graph and check dependency graph is selected
 
 
 ## use semantic search to get better search result in cog search
