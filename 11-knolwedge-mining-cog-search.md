@@ -1538,6 +1538,67 @@ additional results alongside ranked search to be displayed to user for enhanced 
 extract summary sentences from the doc verbatim and highlight most relevant text in summary\
 optional additional feature of semantic search
 
+***semantic ranking***
+method:
+takes top 50 BM25 results\
+split into fields based on semantic configuration\
+fields are converted into text strings then trimmed into 256 tokens\
+strings are passed into machine reading comprehension models to find phrases and sentences that match query\
+resutls are returned in descending order of relevance.\
+
+***semantic ranking capabilities/advantages***
+2 key advantages
+1. more clowsely ranks results by semantics of the original query. moves most relevant to top
+2. finds strings to display as a caption on search page to provide an answer to users
+
+***semantic search limitations***
+doesn't return additional results that are not in top 50\
+
+***semantic search pricing***
+1000 semantic search are availble free per month\
+standard pricing based on volume of queries, types of query, and region\
+
+[search docs](https://azure.microsoft.com/pricing/details/search/)
+
+
+**set up semantic search**
+set-up at service level and will be available for all indexes\
+can not be enabled or disabled on a per index basis
+
+***enable semantic search***
+minimum needs:\
+search with 1 index and not available in all regions\
+[availability docs](https://azure.microsoft.com/explore/global-infrastructure/products-by-region/?products=search)
+
+process to enable in portal:\
+1. go to azure portal
+2. create or go to search service
+3. navigate to semantic search
+4. create
+
+***configure semantic search***
+once created you can configure semantic ranking on a per-index basis\
+can have multiple semantic configurations per index\
+configuration steps:\
+1. create or go to search service
+2. go to indexes
+3. select index
+4. select semantic configuration and select add semantic configuration
+5. in name type name
+6. title field select column that describes document
+7. under content field, in field name, select content field
+8. repeat additional steps for further content fields
+9. keyword fields, in field name, select field with key phrases
+10. repeat for keyword phrases
+11. save
+12. save on index page
+13. 
+
+
+
+
+
+
 
 
 
