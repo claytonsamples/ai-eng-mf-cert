@@ -1512,4 +1512,39 @@ field mappings reshape and fix mismatch in data during indexing process
 
 
 ## use semantic search to get better search result in cog search
+learning achievements:
+- describe semantic search
+- set up semantic search
+- perform semantic search on an index
+
+**intro**
+- capability within cog search aims to improve ranking of search results
+  
+***BM25 ranking function***
+default ranking function\
+based on frequency that search term appears within a doc\
+ranking doesn't place any relevance on semantic of the query and ranking can sometimes be improved by adding language understanding
+
+***sematnic search***
+2 functions
+1. improves ranking of the query results based on language understanding
+2. improves response to the query by providing captions and answers in the results
+
+***semantic ranking***
+simply uses BM25 ranking calc new relevance score by combining language understanding models to extract context and meaning of query
+
+***semantic captions and answers***
+additional results alongside ranked search to be displayed to user for enhanced understanding\
+extract summary sentences from the doc verbatim and highlight most relevant text in summary\
+optional additional feature of semantic search
+
+
+
+
+
+
+
+
+
+
 ## improve search results using vector search in cog search
