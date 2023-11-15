@@ -1402,6 +1402,7 @@ after all these check service tier and add partitions. physical storage where in
 
 ***use best service tier for your search needs***
 |Tier|	Type	|Storage|	Replicas|	Partitions|
+--|--|--|--|--|
 |F	|Free	|50 MB	|1|	1|
 |B	|Basic	|2 GB	|3|	1|
 |S1	|Standard	|25 GB/Partition	|12	|12|
