@@ -1592,20 +1592,54 @@ configuration steps:\
 10. repeat for keyword phrases
 11. save
 12. save on index page
-13. 
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 ## improve search results using vector search in cog search
+learning achievements:
+- describe vector search
+- describe embeddings
+- run vector search queries using rest api
+
+**vector search**
+used to index, store and retrieve vector embedding from search index\
+[image vector search](https://learn.microsoft.com/en-us/training/modules/improve-search-results-vector-search/2-vector-search)
+
+***when to use vector search***
+- openAi or open source models to encode text, and use queries encoded as vectors to retrieve documents
+- similarity search across encoded images, text, video and audio, or a mix of these (multi-modal)
+- represent docs in different lanugages using multi-lingual embedded model to find docs in any language
+- build hybrid searched from vector and searchable text fields as vector searches are implemented at field level. results will be merged to return single response
+- apply filters to text and numeric fields and include this in your query to reduce the data that your vector search needs to process
+- create a vector db to provide an external knowledge base or use a long term memory
+
+***limitations***
+few limmitations when using vector search to be noted:
+- need to provide mebeddings using open ai or similar open source solution, azure cog search doesn't generate these for content
+- customer managed keys aren't supported
+- storage limitations applicable so you should check service quota
+
+Note: where docs are large consider chunking [docs](https://learn.microsoft.com/en-us/azure/search/vector-search-how-to-chunk-documents)
+
+**prepare search**
+encode by sending cog search to embedded model\
+response passed to search engine\
+in order for query to work you need to
+1. index needs vector fields: run empty search, results includes a vector field with # array
+2. convert query input into vector: only query a vector field with query vector. application must convert user text query string into vector by using embedding library used to create source document embeddings
+
+**understand embedding**
+represents semantic meaning of a piece of text\
+visualized as an array of numbers, numerical distance between two embeddings represents semantic similarity.
+
+***embedding models***
+effective search results direct correlation to the effectiveness of embedding model\
+Similarity embeddings: capture semantic similarity between pieces of text\
+text embeddings: look at relevance of a long document to a short query\
+code embedding: embedding of code snippets and natural language
+
+***embedding space***
+core vector queries comprising all the vector fields from the same embedding model.\
+Comprises of all vector fields populated using the same model.
+
+
+
