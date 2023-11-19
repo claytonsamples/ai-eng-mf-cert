@@ -22,7 +22,7 @@ az cognitiveservices account create\
 note: you can find regions available for service thorugh CLI command az account list-locations\
 [cli docs](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/how-to/create-resource?pivots=cli#sign-in-to-the-cli?azure-portal=true)
 
-**Azure OpenAi Studio**\
+**Azure OpenAi Studio**
 - deploy model
 
 **Explore types of generative AI models**\
