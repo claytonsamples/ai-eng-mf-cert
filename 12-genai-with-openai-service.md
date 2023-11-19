@@ -60,7 +60,7 @@ types of prompts
 |Giving factual responses|	How many moons does Earth have?|	One|
 
 ***completion quality***\
-facts that affect quality of completions\
+facts that affect quality of completions
 - prompt engineered structure [docs](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/concepts/prompt-engineering?portal=true)
 - model parameters
 - data model is trained on [model fine-tuning with customization](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/how-to/fine-tuning?pivots=programming-language-studio?portal=true)
