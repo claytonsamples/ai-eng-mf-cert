@@ -12,43 +12,43 @@ With Azure OpenAI Service, developers can quickly and easily access a wide range
 needs: subscription name, resource group name, region, unique instance, pricing tier\
 
 cli implementation:\
-az cognitiveservices account create \
--n MyOpenAIResource (unique name) \
--g OAIResourceGroup (resource group name) \
+az cognitiveservices account create\
+-n MyOpenAIResource (unique name)\
+-g OAIResourceGroup (resource group name)\
 -l eastus (region)\
---kind OpenAI \
---sku s0 \
+--kind OpenAI\
+--sku s0\
 --subscription subscriptionID
 note: you can find regions available for service thorugh CLI command az account list-locations\
 [cli docs](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/how-to/create-resource?pivots=cli#sign-in-to-the-cli?azure-portal=true)
 
-**Azure OpenAi Studio** \
+**Azure OpenAi Studio**\
 - deploy model
 
-**Explore types of generative AI models** \
-pricing is model type and token dependent \
+**Explore types of generative AI models**\
+pricing is model type and token dependent
 
-**deploy gen ai models** \
-deploy first to make api calls \
+**deploy gen ai models**\
+deploy first to make api calls
 
-***deploy using openai studio*** \
-straight forward gui enabled \
+***deploy using openai studio***\
+straight forward gui enabled
 
-***deploy using azure cli*** \
-az cognitiveservices account deployment create \
-   -g myResourceGroupName \
-   -n myResourceName \
-   --deployment-name MyModel \
-   --model-name gpt-35-turbo \
-   --model-version "0301"  \
-   --model-format OpenAI \
+***deploy using azure cli***\
+az cognitiveservices account deployment create\
+   -g myResourceGroupName\
+   -n myResourceName\
+   --deployment-name MyModel\
+   --model-name gpt-35-turbo\
+   --model-version "0301" \
+   --model-format OpenAI\
    --scale-settings-scale-type "Standard"\
 [deploy with rest](https://learn.microsoft.com/en-us/azure/ai-services/openai/)
 
-**Use prompts to get completions from models** \
-prompt is the text portion of a request that is sent to deployed model's completions endpoint. responses are completions. \
+**Use prompts to get completions from models**\
+prompt is the text portion of a request that is sent to deployed model's completions endpoint. responses are completions.
 
-types of prompts \
+types of prompts
 |task|prompt ex|completion ex|
 --|--|--|
 |classify content|tweet: i enjoyed the trip. Sentiment:|positive|
@@ -59,17 +59,17 @@ types of prompts \
 |Picking up where you left off|	One way to grow tomatoes	|is to plant seeds.|
 |Giving factual responses|	How many moons does Earth have?|	One|
 
-***completion quality*** \
-facts that affect quality of completions \
+***completion quality***\
+facts that affect quality of completions\
 - prompt engineered structure [docs](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/concepts/prompt-engineering?portal=true)
 - model parameters
 - data model is trained on [model fine-tuning with customization](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/how-to/fine-tuning?pivots=programming-language-studio?portal=true)
 
-**test models in openai studio's playground** \
-interface to test deployed models \
+**test models in openai studio's playground**\
+interface to test deployed models
 
-***completions playground*** \
-text-in text out interface must select deployments \  
+***completions playground***\
+text-in text out interface must select deployments\
 playground parameters: \
 1. temperature: controls randomness of response. lower produces more repetitive & deterministic responses. Increase more unexpected or creative responses
 2. max length(tokens): 1 token roughly 4 characters. sets limit per model response. 4k for prompt and query
@@ -80,7 +80,7 @@ playground parameters: \
 7. pre-response text: insert text after user's input and before the model's response. help prepare model for response
 8. post-response text: insert text after model's generated response to encourage furter user input
 
-***chat playground parameters*** \
+***chat playground parameters***\
 1. temperature: equal to playground parameter definition
 2. max response: limit on number of tokens per model response. equivalent constraints to max length
 3. top p: same as playground definition
