@@ -68,9 +68,9 @@ facts that affect quality of completions
 **test models in openai studio's playground**\
 interface to test deployed models
 
-***completions playground***
+***completions playground***\
 text-in text out interface must select deployments\
-playground parameters: \
+playground parameters:
 1. temperature: controls randomness of response. lower produces more repetitive & deterministic responses. Increase more unexpected or creative responses
 2. max length(tokens): 1 token roughly 4 characters. sets limit per model response. 4k for prompt and query
 3. stop sequences: responses stop at desired point, e.g. end of sentence or list. specify up to 4 sequences where model will stop generating further tokens in a response. return text won't contain stop sequence
