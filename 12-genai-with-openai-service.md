@@ -68,7 +68,7 @@ facts that affect quality of completions
 **test models in openai studio's playground**\
 interface to test deployed models
 
-***completions playground***\
+***completions playground***
 text-in text out interface must select deployments\
 playground parameters: \
 1. temperature: controls randomness of response. lower produces more repetitive & deterministic responses. Increase more unexpected or creative responses
@@ -80,7 +80,7 @@ playground parameters: \
 7. pre-response text: insert text after user's input and before the model's response. help prepare model for response
 8. post-response text: insert text after model's generated response to encourage furter user input
 
-***chat playground parameters***\
+***chat playground parameters***
 1. temperature: equal to playground parameter definition
 2. max response: limit on number of tokens per model response. equivalent constraints to max length
 3. top p: same as playground definition
