@@ -251,5 +251,99 @@ response = openai.ChatCompletion.create(
 
 print(response['choices'][0]['message']['content'])
 
+## Apply prompt engineering with aoai service
+learning achievements:
+- understand concept of prompt engineering and its role in optimizing aoai models performance
+- know how to design and optimize prompts to better utilize ai models
+- include clear instructions, request output composition, and use contextual content to improve quality of model's responses
 
+**Understand prompt engineering**
+carefully constructing prompts we send, model can provide better and more interesting responses
+
+***what is prompt engineering***\
+process of designing and optimizing prompts to better utilize LLMs\
+Providing relevant, specific, unambiguous, and well structured prompts can help the model better understand the context and generate more accurate responses.\
+[ai principles msft](https://www.microsoft.com/ai/responsible-ai)
+[transparency note](https://learn.microsoft.com/en-us/legal/cognitive-services/openai/transparency-note)
+
+different methods to utilize such as:
+- including instructions, contextual content
+- cues or few-shot examples
+- correctly ordering content in prompt
+
+***considerations for api endpoints***\
+completion uses meta prompt\
+chatcompletion optimized for chat scenarios\
+
+only chatCompeltion can be used with gpt-4 gen models\
+chatcompletion can be used for non chat scenarios, where any instructions are included in the system message and user content is provided in the user role message\
+
+***adjusting model params***\
+temperature and top_p most likely to impact model's response as they both control randomness in model, differently\
+higher values produce more creative and random responses, less consistent or focused\
+fictional or unique benefit from higher values from params\
+more consistent and concrete should use lower values\
+
+**Write more effective prompts**
+quality of the responses depends largely on how well the prompt is written
+
+***provide clear instructions***\
+e.g. product description for new water bottle\
+prompt: Write a product description for a new water bottle\
+response: Introducing the latest addition to our product line - the innovative and eco-friendly water bottle.\
+Made from high-quality, BPA-free materials, this bottle is designed to keep your beverages at the\
+perfect temperature for hours. Its sleek and stylish design makes it the perfect accessory for any\
+outdoor activity or workout session. With its convenient carrying handle and leak-proof lid, you\
+can take it with you wherever you go, without worrying about spills or leaks. Plus, its easy-to-clean\
+design ensures that you can use it again and again, making it the perfect choice for anyone looking\
+for a reliable and sustainable water bottle.\
+
+similar prompt clear instructions:
+prompt: Write a product description for a new water bottle that is 100% recycled. Be sure to include that\
+it comes in natural colors with no dyes, and each purchase removes 10 pounds of plastic from our\
+oceans\
+response: Introducing our newest water bottle, the eco-friendly choice for the conscious consumer. Made from\
+100% recycled materials and available in natural colors with no dyes, this bottle is not only\
+stylish but also sustainable. Each purchase of this bottle removes 10 pounds of plastic from\
+our oceans, making it a responsible choice for those who care about the environment. Its durable\
+and leak-proof design makes it perfect for outdoor activities, while its easy-to-carry handle\
+makes it convenient to take on the go. Join us in our mission to reduce plastic waste and choose\
+this eco-friendly water bottle for your daily hydration needs.\
+
+***format of instructions***\
+recency bias can affect models e.g. info towards end of prompt can have more influence on output than info at beginning\
+
+***use section markers***\
+split instructions
+e.g
+Translate the text into French
+---
+What's the weather going to be like today? (user content)
+---
+
+***primary,supporting, and grounding content***\
+1. primary content: subject of the query, such a sentence to translate or an article to summarize. often at beginning or end of prompt accompanied with instructions explaining what to do\
+e.g.
+---
+<insert full article here, as primary content>
+---
+Summarize this article and identify three takeaways in a bulleted list
+
+2. supporting content: content that may alter the response, but isn't the focus or subject o the prompt e.g. names, preferences, future date to include in the response and so on
+e.g.
+---
+<insert full email here, as primary content>
+---
+<the next line is the supporting content>
+Topics I'm very interested in: AI, webinar dates, submission deadlines
+
+Extract the key points from the above email, and put them in a bulleted list:
+
+3. grounding content: allows model to provide reliable answers by providing content for the model to draw answers from.
+e.g.
+---
+<insert unpublished paper on the history of AI here, as grounding content>
+---
+
+Where and when did the field of AI start?
 
