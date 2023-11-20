@@ -616,5 +616,99 @@ the "numbers" list to get the average.
 go from O(n) to O(1)
 
 ***refactor inefficient code***\
-can guide developers on how to refactor code
-prompt: please evaluate code and refactor
+can guide developers on how to refactor code\
+prompt: please evaluate code and refactor\
+
+## generate images with aoai
+learning achievements:
+- describe dall-e capabilities
+- use dall-e playground
+- azure openai rest interface to integrate dall-e image generation into app
+
+**what is dall-e**
+neural network that generates graphical representations from natural language input\
+not a search system for finding images; ai model that generates new images based on data on which it was trained\
+
+**Explore DALL-E in Azure OpenAI Studio**
+settings adjust:
+- number of images to generate
+- resolution of generated image
+
+**Use the Azure OpenAI REST API to consume DALL-E models**
+requirements are endpoint and key\
+initiate image generation by POST request to service endpoint and must contain following parameters in JSON: prompt, n (# of images), size (resolution)\
+{
+    "prompt": "A badger wearing a tuxedo",
+    "n": 1,
+    "size": "512x512"
+}
+
+
+## use your own data in aoai
+learning achievements:
+- describe capabiltiies on your data
+- configure aoai to use own data
+- use aoai api to generate response based on own data
+
+**Understand how to use your own data**
+1. start by ingesting and indexing your data into azure cognitive search
+2. receive user prompt
+3. determine relevent content and intent of prompt
+4. query the search index with content and intent
+5. insert search result chunk into aoai prompt, along with system message and user prompt
+6. send entire prompt to aoai
+7. return response and data reference
+
+***fine-tuning vs. own data***\
+fine-tuning is a technique to create a custom model\
+aoai on own data uses stateless api to connect to model; which remove req for training custom model\
+
+**Add your own data source**
+file upload: supports .md, .txt, .html, .pdf, word and .ppt if any contain images or graphics response depends on readability of text\
+recommended to use ai studio to upload data to create search resource and index\
+large files use [data prep script](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/concepts/use-your-data#ingesting-your-data-into-azure-cognitive-search?azure-portal=true)
+
+semantic search can be enabled and should increase search index leading to higher likelihood of better response, but more costly\
+
+***connect your data***\
+in chat playground gui walks through very straightforward\
+
+**Chat with your model using your own data**
+***Token considerations and recommended settings***\
+data includes search results on index; how does it impact token count then?\
+each call includes tokens for system message, user prompt, conversation history, retrieved search doc, internal prompts, model's response\
+system message gets truncated to 200 tokens when using own data; typically not token limit\
+response is limited to 1500 tokens\
+due to limitations recommended to limit both question and conversation history sent to model\
+
+***using the api***\
+each call requires endpoint, key, indexName for cog search resource\
+example:
+{
+    "dataSources": [
+        {
+            "type": "AzureCognitiveSearch",
+            "parameters": {
+                "endpoint": "<your_search_endpoint>",
+                "key": "<your_search_endpoint>",
+                "indexName": "<your_search_index>"
+            }
+        }
+    ],
+    "messages":[
+        {
+            "role": "system", 
+            "content": "You are a helpful assistant assisting users with travel recommendations."
+        },
+        {
+            "role": "user", 
+            "content": "I want to go to New York. Where should I stay?"
+        }
+    ]
+}
+
+call to own data goes to different endpoint than with base model; looks something like\
+<your_azure_openai_resource>/openai/deployments/<deployment_name>/extensions/chat/completions?api-version=2023-06-01-preview\
+request also needs Content-type and api-key\
+
+[exercise](https://microsoftlearning.github.io/mslearn-openai/Instructions/Labs/06-use-own-data.html)
