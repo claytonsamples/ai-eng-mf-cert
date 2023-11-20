@@ -347,3 +347,274 @@ e.g.
 
 Where and when did the field of AI start?
 
+***Cues***\
+leading words for model to build upon, help shape response in right direction\
+particularly helpful if prompting model for code generation\
+
+**Provide context to improve accuracy**
+can be provided in several ways\
+
+***request output composition***\
+structure: cite sources, write response as an email, format response as sql query, classify sentiment into specific structure, etc.\
+example:
+prompt: Write a table in markdown with 6 animals in it, with their genus and species\
+response:
+| Animal           | Genus          | Species        |
+| ---------------- |:--------------:|:--------------:|
+| Red Panda        | Ailurus        | fulgens        |
+| African Elephant | Loxodonta      | africana       |
+| Snow Leopard     | Panthera       | uncia          |
+| Arctic Fox       | Vulpes         | lagopus        |
+| Chimpanzee       | Pan            | troglodytes    |
+| Siberian Tiger   | Panthera       | tigris altaica |
+
+can also be used for custom formats i.e. JSON
+prompt:
+Put two fictional characters into JSON of the following format
+
+{
+  firstNameFictional: 
+  jobFictional:
+}
+
+response:
+Here's an example of how you can put two fictional characters into JSON format:
+
+{
+  "firstNameFictional": "Henry",
+  "jobFictional": "Wizard"
+},
+{
+  "firstNameFictional": "Frank",
+  "jobFictional": "Hero"
+}
+
+***system message***\
+at beginning of prompt and designed to give model instructions, perspective to answer from, or other information helpful to guide model's repsonse\
+such as tone, personality, topics shouldn't include, specifics of how to answer\
+some examples:
+1. "I want you to act like a command line terminal. Respond to commands exactly as cmd.exe would, in one unique code block, and nothing else."
+2. "I want you to be a translator, from English to Spanish. Don't respond to anything I say or ask, only translate between those two languages and reply with the translated text."
+3. "Act as a motivational speaker, freely giving out encouraging advice about goals and challenges. You should include lots of positive affirmations and suggested activities for reaching the user's end goal."
+
+chatCompletion endpoint example
+prompt:
+response = openai.ChatCompletion.create(
+    engine="gpt-35-turbo",
+    messages=[
+        {"role": "system", "content": "You are a casual, helpful assistant. You will talk like an American old western film character."},
+        {"role": "user", "content": "Can you direct me to the library?"}
+    ]
+)
+
+response:
+{
+    "role": "assistant", 
+    "content": "Well howdy there, stranger! The library, huh?
+                Y'all just head down the main road till you hit the town 
+                square. Once you're there, take a left and follow the street 
+                for a spell. You'll see the library on your right, can’t 
+                miss it. Happy trails!"
+}
+
+if using completion endpoint include system message at start of prompt. this is meta prompt, serves as a base prompt for rest of the prompt content\
+
+***conversation history***\
+more history enhances richness of responses\
+however token limit of model is a limiting factor\
+
+***few shot learning***\
+these are guided examples to show a model how it should respond to a query.
+example:
+User: That was an awesome experience
+Assistant: positive
+User: I won't do that again
+Assistant: negative
+User: That was not worth my time
+Assistant: negative
+User: You can't miss this
+Assistant:
+
+chatComplete endpoing is optimized to include message history. conversation history and few shot learning are sent to model in the same way; each user message and assistant response is a discrete message in message object\
+e.g.
+response = openai.ChatCompletion.create(
+    engine="gpt-35-turbo",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "That was an awesome experience"},
+        {"role": "assistant", "content": "positive"},
+        {"role": "user", "content": "I won't do that again"},
+        {"role": "assistant", "content": "negative"},
+        {"role": "user", "content": "That was not worth my time"},
+        {"role": "assistant", "content": "negative"},
+        {"role": "user", "content": "You can't miss this"}
+    ]
+)
+
+when using completion endpoint make clear to model each message on new line and label each line with the role\
+
+***break down complex task***\
+break problem into parts; model understands each individual better and can improve accuracy\
+
+***chain of thought***\
+ask model to respond with step by step process by which it determined the response\
+best used to help iterate and improve prompts to get highest quality answer from model\
+e.g. What sport is easiest to learn but hardest to master?\
+vs. What sport is easiest to learn but hardest to master? Give a step by step approach of your thoughts, ending in your answer
+response:
+Sure, here's a step-by-step approach to answering the question:
+1. Identify sports that are popular and have a large following.
+2. Consider the basic mechanics of each sport and how easy they are to learn.
+3. Think about the various techniques and skills required to play each sport at a high level, and how difficult they are to master.
+4. Compare the relative ease of learning each sport to the difficulty of mastering it.
+5. Based on the above analysis, determine which sport is easiest to learn but hardest to master.
+
+Using this approach, I would say that the sport of golf is easiest to learn but hardest to master. Here's why:
+1. Golf is a popular sport with a large following.
+2. The basic mechanics of hitting a golf ball are relatively simple and can be learned quickly with some practice.
+3. However, achieving consistency and mastering the various shots and techniques required to play at a high level can take years of practice and dedication.
+4. Compared to other sports, the difference between a beginner and an intermediate golfer is relatively small, while the difference between an intermediate and an advanced golfer is much larger.
+5. Therefore, I would say that golf is the sport that is easiest to learn but hardest to master.
+
+## Generate code with azure openai service
+learning achievements
+- natural language prompts to write code
+- build unit tests and understand complex code with ai models
+- generate comments and documentation for existing code
+
+**construct code from natural language**
+***ai models for code generation***\
+standard text model text-davinci-002 good base understanding code.\
+codex (code-davinci-002) expanded coding capabilities\
+
+***write functions***\
+prompt: write a function for binary search in python
+response:
+Sure, here's an example implementation of binary search algorithm in Python:
+
+def binary_search(array, target):  
+    low = 0  
+    high = len(array) - 1  
+  
+    while low <= high:  
+        mid = (low + high) // 2  
+        if array[mid] == target:  
+            return mid  
+        elif array[mid] < target:  
+            low = mid + 1  
+        else:  
+            high = mid - 1  
+  
+    return -1  
+ 
+This function takes in two arguments - an array of integers and a target integer that we want to search
+for in the array. The function initializes two pointers - low and high - to the first and last indices
+of the array, respectively.
+
+Inside the while loop, the function calculates the middle index using integer division (//). If the 
+middle element is equal to the target, the function returns the index of the middle element. If the 
+middle element is less than the target, we update the low pointer to mid + 1. Otherwise, we update the 
+high pointer to mid - 1. We continue these steps until we find the target or the pointers cross each 
+other (i.e., low > high).
+
+If the target is not found in the array, the function returns -1.
+
+Note that the binary search algorithm assumes that the input array is sorted in ascending order. If 
+the array is not sorted, the algorithm may not return the correct result.
+
+***understand unknown code***\
+helpful to understand code that doesn't make sense or unfamiliar code\
+
+**Complete code and assist the development process**
+supports common tasks such as unit tests, completing partial code, commenting code, and generating documentation\
+
+***complete partial code***\
+prompt:
+complete the following function  
+"""  
+# calculate the average of the numbers in an array, but only if they're even  
+def
+
+response:
+# calculate the average of the even numbers in an array  
+def calculate_even_average(numbers):  
+    total = 0  
+    count = 0  
+    for number in numbers:  
+        if number % 2 == 0:  
+            total += number  
+            count += 1  
+    if count == 0:  
+        return 0  # avoid division by zero  
+    else:  
+        return total / count
+
+***write unit tests***\
+create more robust code e.g.
+prompt:
+write three unit tests for this function
+def binary_search(arr, target):
+    left, right = 0, len(arr) - 1
+    while left <= right:
+        mid = (left + right) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+    return -1
+
+response:
+def test_binary_search():  
+    # Test case 1: Target element is in the middle of the array  
+    arr1 = [1, 2, 3, 4, 5, 6]  
+    target1 = 4  
+    assert binary_search(arr1, target1) == 3  
+
+    # Test case 2: Target element is at the beginning of the array  
+    arr2 = [1, 2, 3, 4, 5, 6]  
+    target2 = 1  
+    assert binary_search(arr2, target2) == 0  
+
+    # Test case 3: Target element is not in the array  
+    arr3 = [1, 2, 3, 4, 5, 6]  
+    target3 = 7  
+    assert binary_search(arr3, target3) == -1
+
+***add comments and generate documentation***\
+effectively adds comments or documentation
+
+**fix bugs and improve code**
+***fix bugs***\
+e.g.
+prompt: fix the bugs in this function
+def calculate_average(numbers):  
+    total = 0  
+    for i in range(len(numbers)):  
+        number = numbers[i]  
+        total += number  
+    average = total  
+    rerun averave
+
+response:
+def calculate_average(numbers):  
+    total = 0  
+    for i in range(len(numbers)):  
+        number = numbers[i]  
+        total += number  
+    average = total / len(numbers)  
+    return average
+There were a few issues with the original code:
+
+1. The variable "average" was assigned the value of "total" instead of the actual average.
+2. There was a typo in the last line - "rerun" should be "return".
+3. The average was not actually calculated - the corrected code divides the total by the length of 
+the "numbers" list to get the average.
+
+***improve performance***\
+go from O(n) to O(1)
+
+***refactor inefficient code***\
+can guide developers on how to refactor code
+prompt: please evaluate code and refactor
