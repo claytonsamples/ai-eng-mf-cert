@@ -195,6 +195,7 @@ update service config by PUT request to {Your-Endpoint}/personalizer/v1.1-previe
 [service config docs](https://learn.microsoft.com/en-us/rest/api/personalizer/1.1preview1/service-configuration/update?tabs=HTTP)
 
 
+**Interpret feature scores**
 
 
 
