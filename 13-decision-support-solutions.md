@@ -196,7 +196,89 @@ update service config by PUT request to {Your-Endpoint}/personalizer/v1.1-previe
 
 
 **Interpret feature scores**
+{
+  "ranking": [
+    {
+      "id": "EntertainmentProduct",
+      "probability": 0.8
+    },
+    {
+      "id": "SportsProduct",
+      "probability": 0.15
+    },
+    {
+      "id": "HomeProduct",
+      "probability": 0.05
+    }
+  ],
+ "eventId": "75269AD0-BFEE-4598-8196-C57383D38E10",
+ "rewardActionId": "EntertainmentProduct",
+ "inferenceExplanation": [
+    {
+        "id": "EntertainmentProduct",
+        "features": [
+            {
+                "name": "user.profileType",
+                "score": 3.0
+            },
+            {
+                "name": "user.latLong",
+                "score": -4.3
+            },
+            {
+                "name": "user.deviceType",
+                "score" : 12.1
+            },
+        ]
+    }
+  ]
+}
 
+action with largest probability is the best action\
+Larger positive scores provide more incentive for the model choosing an action.\
+Larger negative scores provide more incentive for the model not choosing an action.\
+Scores close to zero have a small effect on the decision to choose an action.\
+This means the user.deviceType feature with a score of 12.1 has the most positive influence on the action having been selected. Conversely, the user.latLong feature with a score of -4.3 has the most influence on why the action would not have been selected.\
+
+enabling inference explanation increases latency of rank api\
+consider experiments to evaluate latency other considerations can be found here [docs](https://learn.microsoft.com/en-us/azure/ai-services/personalizer/how-to-inference-explainability)
+
+**Run evaluations**
+offline evals are available to check how well ai personalizer is running compared to default behavior or measure how config setting changes can improve your model\
+optimization discovery runs against various learning policies and can find optimized model performance\
+
+***run offline eval***\
+go to portal\
+navigate to optimize\
+selct create evaluation\
+
+Your chosen Evaluation name.\
+A Start date and End date. These specify the range of data that you'll use for evaluation. This data needs to be in the logs, as specified in the Data Retention value.\
+Optimization discovery. You set this to Yes to enable Azure AI Personalizer to try to find more optimal learning policies.\
+Add learning settings - use this to upload a learning policy file if you want to evaluate a custom or previously exported policy.\
+generally need 50k events in log for meaningful evaluation results\
+
+***review evaluation results***\
+not much here other than navigation and place to find confidence intervals and other metrics\
+
+***run feature evaluations***\
+on log data too:
+- identify which features are most or least important
+- think of new features that could be useful to learning based on features in your model
+- find potentially unimportant or unuseful features for further analysis or deletion
+- troubleshoot common issues that happen when designing features
+
+create feature evaluation report by:
+navigating to the portal\
+select monitor in side bar\
+select features tab\
+
+***interpret feature scores***\
+why a feature might have had a lower importance, score including:
+The number of occurrences of the feature was low compared with other features.\
+The values for the feature didn't have much diversity or variation.\
+The values were too noisy (random), or too distinct, and provided little value. This happens if the number of unique values is too high.\
+There's a data or formatting issue. Ensure that the feature is formatted properly and sent to Azure AI Personalizer in the expected format.\
 
 
 
