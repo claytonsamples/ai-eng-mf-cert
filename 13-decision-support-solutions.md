@@ -243,7 +243,7 @@ This means the user.deviceType feature with a score of 12.1 has the most positiv
 enabling inference explanation increases latency of rank api\
 consider experiments to evaluate latency other considerations can be found here [docs](https://learn.microsoft.com/en-us/azure/ai-services/personalizer/how-to-inference-explainability)
 
-**Run evaluations**
+**Run evaluations**\
 offline evals are available to check how well ai personalizer is running compared to default behavior or measure how config setting changes can improve your model\
 optimization discovery runs against various learning policies and can find optimized model performance\
 
