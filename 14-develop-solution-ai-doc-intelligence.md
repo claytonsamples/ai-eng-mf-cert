@@ -148,7 +148,7 @@ note pdf and tiff files can have any number of pages but standard tier only firs
 |General document|	X|	X	|X	|X|	X|	|
 |Layout|	X	|||		X	|X|	|
 |Invoice|	X	|X|		|X|	X|	X|
-|Receipt|	X|	X|	|	|	|	|X|
+|Receipt|	X|	X|	|	|	|	X|
 |W2|	X	|X|		|X	|X|	X|
 |ID document|	X	|X|	|		|	|X|
 |Business card|	X|	X	|	|	|	|X|
