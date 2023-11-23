@@ -152,3 +152,100 @@ note pdf and tiff files can have any number of pages but standard tier only firs
 |W2|	X	|X|		|X	|X|	X|
 |ID document|	X	|X|	|		|	|X|
 |Business card|	X|	X	|	|	|	|X|
+[doc intell studio]](https://formrecognizer.appliedai.azure.com/studio)
+
+***calling prebuilt models by using apis***\
+apis available for: C# and other .NET languages, java, python, javaScript\
+
+to make a connection you need service endpoint (value is the URL where service is published) and API key\
+
+best to use asynchronous calls to submit a form and then obtain results from the analysis
+document_analysis_client = DocumentAnalysisClient(endpoint=endpoint, 
+    credential=AzureKeyCredential(key))
+
+task = document_analysis_client.begin_analyze_document_from_url(
+    "prebuilt-document", docUrl)
+
+result = task.result()
+
+**Use the General Document, Read, and Layout models**
+***using the read model***\
+
+detect language that a line of text is written in and classify whether it's handwritten or printed (latin langugaes only)\
+multi-age pdf or tiff files, use pages parameter in request to fix a page range for analysis\
+ideal for extracting words and lines from documents wiht no fixed or predictable structure\
+
+***using the general document model***\
+extract key-value pairs, entities, selection marks, and tables from structured, semi-structured, and unstructured docs\
+only model to support entity extraction\
+entities that can be detected:\
+person\
+persontype: job title or role\
+location: buildings, geographical features, geopolitical entities\
+organization: companies, gov bodies, sports clubs, musical bands, other groups\
+event: social gatherings, historical events, anniversaries\
+products: object bought and sold\
+skill: capability belonging to a person\
+address: mailing address for physical location\
+phone number: dialing codes and numbers for mobile phones and landlines\
+email:\
+URL:\
+IP address:\
+datetime:\
+quantity:\
+
+***using the layout model***\
+extract text and returns selection marks and tables from input image or pdf file\
+good model for rich information about structure of a document\
+selection marks are extracted with bounding box, confidence indicator, whether they're selected or not\
+
+each table cell is extracted with:
+Its content text.\
+The size and position of its bounding box.\
+If it's part of a header column.\
+Indexes to indicate its row and column position in the table.\
+
+**use financial, id, and tax models**
+***using the invoice model***\
+fields for extraction include:
+- customer name and ref id
+- purchase order number
+- invoice and due dates
+- details about vendor, such as name, tax id, physical address
+- similar details about customer
+- billing and shipping addresses
+- amounts such as total tax, invoice total, and amount due
+
+invoice also includes line for purchased items and includes:
+- description, product code
+- amounts i.e. unit price, quantity of items, tax incurred, line total
+
+***using the receipt model***\
+amounts paid instead of charged\
+reliably identifies fields including:
+- merchant details such as name, phone number, and address
+- amounts such as receipt total, tax, and tip
+- date and time of transaction
+
+***using id doc model***\
+us drivers licnese and international passports (biographical pages of passports can be analyzed only) only trained docs\
+fields extracted:
+- first and last names
+- personal info such as sex, dob, nationality
+- country and region where doc was issued
+- unique numbers such as doc number and machine readable zone
+- endorsements, restrictions, and vehicle classifications
+
+***business card model***\
+fields:
+- first and last names
+- postal addresses
+- email and website addresses
+- various telephone numbers
+
+***using w-2 model***\
+fields extracted include:
+- info about employer, name and address
+- info about employee, name, address, social security number
+- info about axes employee has paid
+
