@@ -249,3 +249,259 @@ fields extracted include:
 - info about employee, name, address, social security number
 - info about axes employee has paid
 
+## create a composed form recognizer model
+learning achievements:
+- describe business problems to use custom models and composed models to solve
+- train a custom model to obtain data from forms with unusual structures
+- create a composed model that can analyze forms in multiple formats
+
+**understand composed models**
+enable user to submit form and don't know best model to use\
+
+***what are composed models***\
+2 types:
+1. custom template: forms have consistent visual template. formatting and layout should be consistent across all completed examples of teh form
+2. custom neural models: forms are less consistent, semi-structured or unstructured
+
+***using composed models***\
+GUi in studio enables creating a set of custom models or startcreatecomposedmodelasync() method in custom code\
+docType field identifies custom model used for analysis\
+number of custom models depends on type of custom forms and tier:
+
+|Type of model|	Maximum number in Free (F0) tier	|Maximum number in Standard (S0) tier|
+--|--|--|
+|Custom Template|	500	|5000|
+|Custom Neural|	100|	500|
+|Composed|	5	|200|
+
+max custom models to single composed model is 100
+
+***custom model compatibility***\
+restrictions:
+1. custom template models are composable with other custom template models across 3.0 and 2.1 api versions\
+2. custom neural models are composable with other custom neural models
+3. custom neural models can't be composed with custom template models
+[composed custom models docs](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/concept-composed-models)
+[code sample - model compose](https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/formrecognizer/Azure.AI.FormRecognizer/samples/Sample_ModelCompose.md)
+
+**assemble composed models**
+***create a composed model in doc intell studio***\
+before start need:
+- azure ai doc intell resource in azure sub
+- set of custom models, trained and labeled, you wan tot add to composed model
+[compose custom model docs](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/concept-composed-models)
+
+## Build an Azure AI Document Intelligence custom skill for Azure Cognitive Search
+learning achievements:
+- describe how a custom skill can enrich content passed through an azure cog search pipeline
+- build a custom skill that calls an azure forms analyzer solution to obtain data from forms
+
+doc intell models can enrich cog search index\
+module covers creating custom skill that calls a doc intell model to help index documents\
+
+**Understand Azure Cognitive Search enrichment pipelines**
+index can be enriched with fields doc intell models are trained to extract\
+
+***indexing content in cog search***\
+during indexing process, cog search crawls content, processes it, and creates a list of words that will be added to the index, together with their location\
+5 stages to indexing process:
+1. document cracking: indexer opens content files and extracts content
+2. field mappings: fields such as titles, names, dates, and more are extracted from content. field mappings to control how they're stored in index
+3. skillset execution: optional skillset execution stage, custom ai processing done on the content to enrich teh final index
+4. output filed mappings: using custom skillset, output is mapped to index fields in this stage
+5. push to index: results of indexing process are stored in index within azure cog search
+
+****what is a cog search skillset***\
+each skill is a call to an AI process that enriches the index\
+built-in skills use pre-trained ai models such as:
+- key phrase extraction: detects important phrases in text based on the placement of terms, linguistic rules, and proximity to other terms
+- language detection: detects predominantly used language in text
+- merge: merges text from several fields in to a single field
+- sentiment: detects sentiments i.e. positive, negative, and neutral
+- translation: from original language into another to create multilingual index
+- image analysis: detects contents of an image and generates description
+- optical character recognition: recognizes printed and handwritten text in an image
+[built-in skills list](https://learn.microsoft.com/en-us/azure/search/cognitive-search-predefined-skills)
+
+call create skillset rest api to create and sent JSON definition code: looks like\
+PUT https://[service name].search.windows.net/skillsets/[skillset name]?api-version=[api version]
+  Content-Type: application/json  
+  api-key: [admin key]
+
+[service name] is the name of your Cognitive Search service in Azure.\
+[skillset name] is a name for the skillset you're creating.\
+[api version] is the version of the Search REST API.\
+[admin key] is the API key for the Search service. You can obtain this key from the Azure portal.\
+
+example json code that defines skillset:
+{   
+  "name" : "A name for the skillset",  
+  "description" : "Optionally, add a descriptive text.",   
+  "skills" : [
+
+    ],
+  "cognitiveServices": 
+      {
+        "@odata.type": "#Microsoft.Azure.Search.CognitiveServicesByKey",
+        "key": "<admin key>"
+      },
+  "knowledgeStore": { ... },
+  "encryptionKey": { }
+}
+
+json code above def:
+- cognitiveservices is required if using billable service apis. need api key
+- knowledgeStore is where output from skills can be stored
+- encryptionkey specifies key from key vault and encrypts sensitive content in pipieline
+
+skill section (in above json) defines one or more built-in or custom kill that will analyze content
+"skills":[
+  {
+    "@odata.type": "#Microsoft.Skills.Text.V3.EntityRecognitionSkill",
+    "name": "Entity recognition",
+    "context": "/document",
+    "categories": [ "Organization" ],
+    "inputs": [
+      {
+        "name": "text",
+        "source": "/document/content"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "organizations",
+        "targetName": "orgs"
+      }
+  },
+  {
+      "@odata.type": "#Microsoft.Skills.Vision.ImageAnalysisSkill",
+      "name": "Image analysis",
+      "context": "/document/normalized_images/*",
+      "visualFeatures": [
+          "brands"
+      ],
+      "inputs": [
+          {
+              "name": "image",
+              "source": "/document/normalized_images/*"
+          }
+      ],
+      "outputs": [
+          {
+              "name": "brands"
+          }
+      ]
+  }
+]
+
+***what is a custom skill***\
+use for 2 reasons:
+- built-in skills doesn't include type of ai enrichment needed
+- want to train your own model
+
+2 types of custom skills:
+1. AML: enrich by calling AML model
+2. custom web api skills: enrich index by calling a web service. i.e. applied ai services, such as AI doc intell
+
+web service requires certain requirements be met i.e.:
+- service must accept a json payload as an input and return a second json payload as its results
+- output JSON should have a top-level entity named value that contains an array of objects
+- number of objects sent to service should match number of objects in teh values entity
+- each object in values should include a unique recordid property, a data property with the returned info, a warnings property, and an errors property
+
+***integrate cog search and azure ai doc intell***\
+integrate using these steps:
+1. create ai doc intell resource in azure subscription
+2. configure one or more models in doc intell either with prebuilt models or train your own model for unusual or unique form types
+3. develop and deploy a web service that can call your azure ai document intell resource
+4. add custom web api skill, with config to cog search skillset. skill should be configed to send requests to web service
+
+**Build an Azure AI Document Intelligence custom skill**
+write web service that integrates custom skill interface (must have)\
+
+***custom skill interface and requirements***\
+ensuring compatibility with other skills and cog search indexing should be first consideration\
+code must hanlde the following input values in JSON body of REST request:\
+values: The JSON body will include a collection named values. Each item in this collection represents a form to analyze.\
+    recordId: Each item in the values collection has a recordId. You must include this ID in the output JSON so that Cognitive Search can match input forms with their results.\
+    data. Each item in the values includes a data collection with two values:\
+      formUrl. This is the location of the form to analyze.\
+      formSasToken. If the form is stored in Azure Storage, this token enables your code to authenticate with that account.\
+
+Response includes a JSON body and cog search expects response format to include:\
+values. A collection in which each item is one of the submitted forms.\
+    recordId. Cognitive Search uses this value to match results to one of the input forms.\
+    data. Use the data collection to return the fields that Azure AI Document Intelligence has extracted from each input form.\
+    errors. If you couldn't obtain the analysis for a form, use the errors collection to indicate why.\
+    warnings, If you have obtained results but some non-critical problem has arisen, use the warnings collection to report the issue.\
+
+***testing the custom skill***\
+test by sending rest requests and observing responses e.g. postman\
+there is a Code + test tool in azure to formulate and submit test REST requests\
+in visual studio, deploy function locally with F5, then submit requests to function by sending URL: POST https://localhost:7071/api/analyze-form\
+requests specifies a form to analyze by its url included in json body:
+{
+    "values": [
+        {
+            "recordId": "record1",
+            "data": { 
+                "formUrl": "<your-form-url>",
+                "formSasToken": "<your-sas-token>" # if in storage account authenticate with token with Get shared access signature in azure storage explorer
+            }
+        }
+    ]
+}
+
+response to above json request could look like:
+{
+    "values": [
+        {
+            "recordId": "record1",
+            "data": {
+                "address": "1111 8th st. Bellevue, WA 99501 ",
+                "recipient": "Southridge Video 1060 Main St. Atlanta, GA 65024"
+            },
+            "errors": null,
+            "warnings": null
+        }
+    ]
+}
+
+***hosting a custom skill***\
+host within azure can deploy with:
+- azure function
+- container in azure container instance service
+- container in azure kubernetes services
+
+***add custom skill to skillset***\
+custom skill completed, tested, and hosted config cog search to call it\
+{
+  "@odata.type": "#Microsoft.Skills.Custom.WebApiSkill",
+  "description": "A custom skill that calls Azure AI Document Intelligence",
+  "uri": "https://contoso.com/formrecognizer",
+  "batchSize": 1,
+  "context": "/document",
+  "inputs": [
+    {
+      "name": "formUrl",
+      "source": "/document/metadata_storage_path"
+    }
+  ],
+  "outputs":[ 
+    { 
+      "name":"address",
+      "targetName":"address"
+    },
+    { 
+      "name":"recipient",
+      "targetName":"recipient"
+    }
+  ]
+}
+
+Microsoft.Skills.Custom.WebApiSkill is required to define this as a Web API skill.\
+uri is the location of the web service. In this module, the web service is implemented as an Azure Function. The Function is the interface between the search pipeline and Azure AI Document Intelligence.\
+inputs determines the data that is sent to the skill for analysis.\
+outputs determines the data that is returned from the skill.\
+[custom skill to pipeline doc](https://learn.microsoft.com/en-us/azure/search/cognitive-search-custom-skill-interface)
+
