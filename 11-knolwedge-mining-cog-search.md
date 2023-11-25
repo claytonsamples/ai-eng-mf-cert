@@ -1644,5 +1644,24 @@ Comprises of all vector fields populated using the same model.
 
 **understand index**
 index schema: searchable documents in a container\
-index is a table with row representing a document. tables have columns, and columns are equivalent to fields in a  doc. cols have data types.\
+index is a table with row representing a document. tables have columns, and columns are equivalent to fields in a  doc. cols have data types.
+index is persistent collection of JSON documents and other content used to enable search functionality.
+example of an index schema with ai-extracted fields keyphrases and imageTags:
+{
+ "name":"index",
+ "fields": [
+ {
+   "name":"content","type":"Edm.String","analyzer":"standard.lucene","fields":[]
+ }
+ {
+   "name":"keyphrases","type":"collection(Edm.String)","analyzer":"standard.lucene","fields":[]
+ },
+ {
+   "name":"imageTags","type":"Collection(Edm.String)","analyzer":"standard.lucene","fields":[]
+ },
+ ]
+}
+
+[query syntax docs](https://learn.microsoft.com/en-us/azure/search/query-odata-filter-orderby-syntax)
+
 
