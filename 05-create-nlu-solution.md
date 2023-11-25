@@ -71,10 +71,10 @@ built in features such as language detection and sentiment analysis query analyz
 |{API-VERSION}	|The version of the API you're calling|
 
 ### Define intents, utterances, and entities
-- utterances phrases a user might enter
+- utterances phrases a user might enter or say and must be interpreted by application (e.g. switch the fan on)
 - intent is task or action user wants to perform (meaning of utterance)
-examples: GetTime (intent) ; What time is it? (utterance)
-- entities add context to intents
+examples: GetTime (intent) ; What time is it? (utterance) or TurnOn in fan example
+- entities add context to intents (fan is the entity from utternace example
 
 process:
 - consider domain and intents model needs
