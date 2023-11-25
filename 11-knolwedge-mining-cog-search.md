@@ -1642,4 +1642,7 @@ core vector queries comprising all the vector fields from the same embedding mod
 Comprises of all vector fields populated using the same model.
 
 
+**understand index**
+index schema: searchable documents in a container\
+index is a table with row representing a document. tables have columns, and columns are equivalent to fields in a  doc. cols have data types.\
 
